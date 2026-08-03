@@ -1,0 +1,44 @@
+alias: Find Brents Phone
+icon: mdi:phone-alert
+description: Rings Brent's phone at max volume even if on silent
+mode: restart
+sequence:
+  # 1. Take the phone off silent first
+  - action: notify.mobile_app_brents_phone
+    data:
+      message: command_ringer_mode
+      data:
+        command: normal
+        priority: high
+        ttl: 0
+  # 2. Small gap so the ringer-mode change lands before the sound
+  - delay:
+      milliseconds: 500
+  # 3. Crank media volume to max
+  - action: notify.mobile_app_brents_phone
+    data:
+      message: command_volume_level
+      data:
+        media_stream: alarm_stream
+        command: 100
+        priority: high
+        ttl: 0
+  # 4. Fire the alarm notification
+  - action: notify.mobile_app_brents_phone
+    data:
+      message: TTS
+      title: 📱 Find My Phone
+      data:
+        ttl: 0
+        tag: find_my_phone
+        priority: high
+        importance: high
+        vibrationPattern: 100, 1000, 100, 1000, 100
+        persistent: true
+        sticky: true
+        channel: find_my_phone
+        media_stream: alarm_stream_max
+        tts_text: Brent, your phone is right here!
+        actions:
+          - action: DISMISS
+            title: Found it
