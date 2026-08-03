@@ -1,0 +1,29 @@
+alias: Find Brents Phone
+description: Voice + button trigger to locate Brent's phone
+triggers:
+  - trigger: conversation
+    id: find
+    command:
+      - (find|where is|wheres|where's|locate|ring|ping) (brent|brents|brent's|dad|dads|dad's|my) phone
+      - where the (hell|heck|bloody hell) is my phone
+  - trigger: conversation
+    id: stop
+    command:
+      - (stop|found|got|silence) (ringing|the phone|my phone|it)
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: stop
+        sequence:
+          - action: notify.mobile_app_brents_phone
+            data:
+              message: clear_notification
+              data:
+                tag: find_my_phone
+          - set_conversation_response: Righto, silenced it.
+    default:
+      - action: script.find_brents_phone
+      - set_conversation_response: OK, finding your bloody phone!
+mode: single
