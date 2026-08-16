@@ -17,8 +17,9 @@ isn't the app currently running, relaunches it automatically over ADB.
 3. If `app_id` is **not** the companion app package, it runs an ADB
    `monkey ... LAUNCHER` command to bring the app back to the foreground
    (cold-starting it if it was killed).
-4. It then **logs the restart to a file** and raises a **notification** so you
-   have a record of how often the app has to be relaunched.
+4. It then **writes the restart to the standard Home Assistant log** and raises
+   a **notification** so you have a record of how often the app has to be
+   relaunched.
 
 ## Prerequisites
 
@@ -49,37 +50,6 @@ Open the integration's **Configure** dialog and add the companion app to the
 ```
 io.homeassistant.companion.android = Home Assistant / View Assist
 ```
-
-### 4. Set up the File log (`notify.nspanel_watchdog_log`)
-
-The automation writes each restart to a log file through Home Assistant's
-**File** notify integration. Set it up once:
-
-**Option A — UI (recommended):** **Settings → Devices & Services → Add
-Integration → File**, choose **Notify**, and set:
-
-- **File name:** `nspanel_view_assist_watchdog.log`
-- **Add timestamp:** on (optional — the automation also writes its own
-  timestamp)
-- Name the created entity **`nspanel_watchdog_log`** so it becomes
-  `notify.nspanel_watchdog_log`.
-
-The file is written under your HA config directory (e.g.
-`/config/nspanel_view_assist_watchdog.log`). Make sure the folder is on your
-`allowlist_external_dirs` if you point it elsewhere.
-
-**Option B — YAML** (legacy `notify` platform):
-
-```yaml
-notify:
-  - platform: file
-    name: nspanel_watchdog_log
-    filename: nspanel_view_assist_watchdog.log
-    timestamp: true
-```
-
-> If you'd rather not log to a file, delete the `notify.nspanel_watchdog_log`
-> action from the automation — the notification step is independent.
 
 ## Install the automation
 
@@ -128,6 +98,8 @@ automation.
       message: "Relaunched at {{ when }} (was showing '{{ previous_app }}')."
   ```
 
-- **Log location** — the restart log is written by `notify.nspanel_watchdog_log`
-  to `nspanel_view_assist_watchdog.log` in your HA config directory. Tail it to
-  see how often the app is being relaunched.
+- **Restart log** — written to the standard Home Assistant log via
+  `system_log.write` under the logger `nspanel_view_assist_watchdog`. See it in
+  **Settings → System → Logs** or in `home-assistant.log`. It's logged at
+  `warning` level so it's visible by default; change `level:` to `info` in the
+  automation to quiet it down.

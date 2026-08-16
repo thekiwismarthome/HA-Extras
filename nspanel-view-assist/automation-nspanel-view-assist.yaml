@@ -73,16 +73,18 @@ actions:
       command: >-
         monkey -p io.homeassistant.companion.android -c android.intent.category.LAUNCHER 1
 
-  # --- Log to a file ---------------------------------------------------------
-  # Appends a timestamped line to the log file exposed by the "File" notify
-  # integration (see README.md → "File log" for the one-time setup that creates
-  # notify.nspanel_watchdog_log).
-  - action: notify.nspanel_watchdog_log
+  # --- Log to the standard Home Assistant log --------------------------------
+  # Writes an entry to Home Assistant's own log (home-assistant.log, and the
+  # Settings -> System -> Logs UI) under the logger name shown below. No extra
+  # setup needed. Level "warning" makes it stand out; change to "info" to keep
+  # it quiet (info is hidden unless you lower the log level for this logger).
+  - action: system_log.write
     data:
+      level: warning
+      logger: nspanel_view_assist_watchdog
       message: >-
-        [{{ when }}] View Assist app was not running on NSPanel Pro 120
-        (foreground app was '{{ previous_app }}') — relaunched
-        io.homeassistant.companion.android
+        View Assist app was not running on NSPanel Pro 120 (foreground app was
+        '{{ previous_app }}') — relaunched io.homeassistant.companion.android
 
   # --- Notify ----------------------------------------------------------------
   # In-dashboard persistent notification (always available, no setup needed).
