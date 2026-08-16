@@ -13,7 +13,7 @@
 #
 # Before use, find-and-replace the two placeholders throughout this file:
 #   * media_player.office_nspanel_pro_media_player        -> your ADB media_player entity id
-#   * io.homeassistant.companion.android  -> the app package you want kept alive
+#   * com.msp1974.vacompanion  -> the app package you want kept alive
 #                                            (this is the default HA Companion
 #                                             / View Assist package)
 # =============================================================================
@@ -55,7 +55,7 @@ conditions:
   - condition: template
     value_template: >-
       {{ state_attr('media_player.office_nspanel_pro_media_player', 'app_id')
-         != 'io.homeassistant.companion.android' }}
+         != 'com.msp1974.vacompanion' }}
 
 actions:
   # Remember what was on screen so we can report it, then relaunch.
@@ -71,7 +71,7 @@ actions:
       entity_id: media_player.office_nspanel_pro_media_player
     data:
       command: >-
-        monkey -p io.homeassistant.companion.android -c android.intent.category.LAUNCHER 1
+        monkey -p com.msp1974.vacompanion -c android.intent.category.LAUNCHER 1
 
   # --- Log to the standard Home Assistant log --------------------------------
   # Writes an entry to Home Assistant's own log (home-assistant.log, and the
@@ -84,7 +84,7 @@ actions:
       logger: nspanel_view_assist_watchdog
       message: >-
         View Assist app was not running on NSPanel Pro 120 (foreground app was
-        '{{ previous_app }}') — relaunched io.homeassistant.companion.android
+        '{{ previous_app }}') — relaunched com.msp1974.vacompanion
 
   # --- Notify ----------------------------------------------------------------
   # In-dashboard persistent notification (always available, no setup needed).
