@@ -12,7 +12,7 @@
 #   NSPanel Pro. See README.md in this folder for setup + prerequisites.
 #
 # Before use, find-and-replace the two placeholders throughout this file:
-#   * media_player.nspanel_pro_120        -> your ADB media_player entity id
+#   * media_player.office_nspanel_pro_media_player        -> your ADB media_player entity id
 #   * io.homeassistant.companion.android  -> the app package you want kept alive
 #                                            (this is the default HA Companion
 #                                             / View Assist package)
@@ -32,7 +32,7 @@ triggers:
     minutes: "/2"
   # 2) Also react immediately when the panel screen wakes up.
   - trigger: state
-    entity_id: media_player.nspanel_pro_120
+    entity_id: media_player.office_nspanel_pro_media_player
     to: "on"
 
 conditions:
@@ -42,7 +42,7 @@ conditions:
   - condition: not
     conditions:
       - condition: state
-        entity_id: media_player.nspanel_pro_120
+        entity_id: media_player.office_nspanel_pro_media_player
         state:
           - "off"
           - "standby"
@@ -54,13 +54,13 @@ conditions:
   # attribute (populated when the app is listed in the integration options).
   - condition: template
     value_template: >-
-      {{ state_attr('media_player.nspanel_pro_120', 'app_id')
+      {{ state_attr('media_player.office_nspanel_pro_media_player', 'app_id')
          != 'io.homeassistant.companion.android' }}
 
 actions:
   # Remember what was on screen so we can report it, then relaunch.
   - variables:
-      previous_app: "{{ state_attr('media_player.nspanel_pro_120', 'app_id') | default('unknown', true) }}"
+      previous_app: "{{ state_attr('media_player.office_nspanel_pro_media_player', 'app_id') | default('unknown', true) }}"
       when: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
   # Launch the app via the Android "monkey" launcher intent. This brings the
@@ -68,7 +68,7 @@ actions:
   # killed.
   - action: androidtv.adb_command
     target:
-      entity_id: media_player.nspanel_pro_120
+      entity_id: media_player.office_nspanel_pro_media_player
     data:
       command: >-
         monkey -p io.homeassistant.companion.android -c android.intent.category.LAUNCHER 1
