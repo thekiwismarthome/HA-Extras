@@ -49,23 +49,39 @@ conditions:
           - "unavailable"
           - "unknown"
 
-  # And only when the companion app is NOT the current foreground app.
-  # The androidtv media_player exposes the running package as the "app_id"
-  # attribute (populated when the app is listed in the integration options).
-  - condition: template
-    value_template: >-
-      {{ state_attr('media_player.office_nspanel_pro_media_player', 'app_id')
-         != 'com.msp1974.vacompanion' }}
-
 actions:
-  # Remember what was on screen so we can report it, then relaunch.
+  # 1) Ask Android which app is actually in the foreground. Rather than trust
+  #    the media_player "app_id" attribute (which only populates for apps you
+  #    have added to the integration's Applications list, and stays blank for
+  #    View Assist otherwise), we query the resumed activity directly over ADB.
+  #    The androidtv integration stores the command output in the media_player's
+  #    "adb_response" attribute, which we read back a moment later.
+  - action: androidtv.adb_command
+    target:
+      entity_id: media_player.office_nspanel_pro_media_player
+    data:
+      command: "dumpsys activity activities | grep mResumedActivity"
+
+  # Give the integration a moment to publish the response.
+  - delay: "00:00:01"
+
+  # 2) Parse the foreground package out of the response, e.g.
+  #    "...u0 com.eWeLinkControlPanel/com.coolkit...MainActivity t57}"
   - variables:
-      previous_app: "{{ state_attr('media_player.office_nspanel_pro_media_player', 'app_id') | default('unknown', true) }}"
+      adb_response: "{{ state_attr('media_player.office_nspanel_pro_media_player', 'adb_response') | string }}"
+      previous_app: "{{ (adb_response | regex_findall('u0 (\\S+)/') | first) | default('unknown', true) }}"
       when: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-  # Launch the app via the Android "monkey" launcher intent. This brings the
-  # app to the foreground if it is backgrounded, or cold-starts it if it was
-  # killed.
+  # 3) If the companion app IS already in the foreground, there's nothing to do.
+  - if:
+      - condition: template
+        value_template: "{{ 'com.msp1974.vacompanion' in adb_response }}"
+    then:
+      - stop: "View Assist app already in the foreground."
+
+  # 4) Otherwise launch the app via the Android "monkey" launcher intent. This
+  #    brings the app to the foreground if it is backgrounded, or cold-starts it
+  #    if it was killed.
   - action: androidtv.adb_command
     target:
       entity_id: media_player.office_nspanel_pro_media_player

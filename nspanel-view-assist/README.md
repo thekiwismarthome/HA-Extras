@@ -11,11 +11,12 @@ isn't the app currently running, relaunches it automatically over ADB.
 
 1. A **time-pattern trigger** polls every couple of minutes (plus an extra
    trigger that fires the moment the screen wakes).
-2. It checks the NSPanel Pro's `media_player` entity's **`app_id`** attribute,
-   which the Android Debug Bridge integration sets to the package name of the
-   app currently in the foreground.
-3. If `app_id` is **not** the companion app package, it runs an ADB
-   `monkey ... LAUNCHER` command to bring the app back to the foreground
+2. It runs an ADB `dumpsys activity activities | grep mResumedActivity` command
+   and reads the result back from the `media_player` entity's **`adb_response`**
+   attribute — this is the package/activity actually resumed in the foreground,
+   e.g. `com.eWeLinkControlPanel/...MainActivity`.
+3. If the companion app package is **not** present in that response, it runs an
+   ADB `monkey ... LAUNCHER` command to bring the app back to the foreground
    (cold-starting it if it was killed).
 4. It then **writes the restart to the standard Home Assistant log** and raises
    a **notification** so you have a record of how often the app has to be
@@ -42,14 +43,18 @@ Android Debug Bridge**.
 This creates a `media_player.*` entity for the panel. Rename it if you like,
 then use that entity id in the automation.
 
-### 3. Tell the integration which apps to track (so `app_id` populates)
+### 3. (Nothing extra to configure for detection)
 
-Open the integration's **Configure** dialog and add the companion app to the
-**Applications** list so the `app_id` attribute reports it, e.g.:
+You do **not** need to add the app to the integration's **Applications** list.
+The automation reads the true foreground app straight from ADB
+(`dumpsys ... mResumedActivity`), so it works even for apps the integration
+doesn't otherwise report.
 
-```
-io.homeassistant.companion.android = Home Assistant / View Assist
-```
+> **Why not the `app_id` attribute?** The androidtv integration only populates
+> `app_id` for packages you've explicitly added to its Applications list, so
+> the View Assist companion app often never shows there — and the `media_player`
+> never goes `unavailable` when the app is closed. Querying `mResumedActivity`
+> directly avoids both problems.
 
 ## Install the automation
 
@@ -64,15 +69,18 @@ io.homeassistant.companion.android = Home Assistant / View Assist
 ## Finding the correct app package name
 
 If you aren't using the stock HA Companion app (some View Assist builds use a
-different launcher/package), find the real package name from
-**Developer Tools → Template** while the app is open on the panel:
+different launcher/package), open the app on the panel and read the resumed
+activity via ADB (**Developer Tools → Actions → `androidtv.adb_command`**):
 
-```jinja
-{{ state_attr('media_player.nspanel_pro_120', 'app_id') }}
+```
+dumpsys activity activities | grep mResumedActivity
 ```
 
-Or list every package installed on the panel via ADB
-(**Developer Tools → Actions → `androidtv.adb_command`**):
+The result lands in the entity's `adb_response` attribute
+(**Developer Tools → States**); the package is the part before the `/`, e.g.
+`com.msp1974.vacompanion/...`.
+
+Or list every package installed on the panel:
 
 ```
 pm list packages
