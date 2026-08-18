@@ -1,0 +1,41 @@
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+aspect_ratio: 1/1
+
+# Navigate to the "home" view of the CURRENT dashboard. The dashboard url-path is
+# auto-detected from the browser URL (/<dashboard>/<view>), so this card can be
+# copy-pasted to any dashboard without editing. Each dashboard just needs a view
+# whose path is "home".
+tap_action:
+  action: navigate
+  navigation_path: |
+    [[[ return '/' + window.location.pathname.split('/')[1] + '/home'; ]]]
+hold_action:
+  action: none
+
+custom_fields:
+  back_graphic: |
+    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%">
+      <path d="M30 50 H72"/>
+      <path d="M48 32 L30 50 L48 68"/>
+    </svg>
+
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    back_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 60%
+      - height: 60%
+      - color: "#D2D2D2"
