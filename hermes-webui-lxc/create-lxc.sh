@@ -110,8 +110,17 @@ for _ in $(seq 1 30); do
   sleep 2
 done
 
-echo "==> Fetching installer inside the container"
-pct exec "$CTID" -- bash -c "curl -fsSL '${INSTALL_SCRIPT_URL}' -o /root/install.sh && chmod +x /root/install.sh"
+# The base Debian template ships without curl/wget, so fetch install.sh here
+# on the host (which has curl) and push it in, rather than relying on the
+# fresh container being able to fetch it itself.
+echo "==> Fetching installer"
+TMP_INSTALL="$(mktemp)"
+trap 'rm -f "$TMP_INSTALL"' EXIT
+curl -fsSL "$INSTALL_SCRIPT_URL" -o "$TMP_INSTALL"
+
+echo "==> Copying installer into the container"
+pct push "$CTID" "$TMP_INSTALL" /root/install.sh
+pct exec "$CTID" -- chmod +x /root/install.sh
 
 echo "==> Running installer inside the container"
 pct exec "$CTID" -- env \
