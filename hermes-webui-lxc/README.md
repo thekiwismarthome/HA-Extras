@@ -27,16 +27,26 @@ Run this **on the Proxmox host** (in the Proxmox shell, as root):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/thekiwismarthome/HA-Extras/main/hermes-webui-lxc/create-lxc.sh -o create-lxc.sh
-WEBUI_PASSWORD='pick-something-strong' CTID=900 bash create-lxc.sh
+bash create-lxc.sh
 ```
 
-This creates the container, waits for networking, then pulls and runs
+It auto-picks the next free container ID (`pvesh get /cluster/nextid`) and
+prompts you to set a password interactively (twice, to confirm) since the
+container binds to all interfaces by default and is reachable from your LAN.
+It then creates the container, waits for networking, and pulls and runs
 [`install.sh`](./install.sh) inside it automatically. When it finishes it
 prints the URL to open, e.g. `http://192.168.1.50:8787`.
 
-**Always set `WEBUI_PASSWORD`** — the container binds to all interfaces by
-default so it's usable from your LAN, which means an unauthenticated instance
-is reachable by anything else on that network.
+For scripted/non-interactive runs, skip the prompt by setting `CTID` and
+`WEBUI_PASSWORD` up front:
+
+```bash
+CTID=910 WEBUI_PASSWORD='pick-something-strong' bash create-lxc.sh
+```
+
+(Piping straight from `curl | bash` also skips the prompt, since there's no
+terminal to read from — it'll warn and continue with no password unless you
+set `WEBUI_PASSWORD` in the same command.)
 
 ### Settings you'll likely want to change
 
@@ -44,7 +54,7 @@ All via environment variables before running `create-lxc.sh`:
 
 | Variable | Default | Notes |
 |---|---|---|
-| `CTID` | `900` | Proxmox container ID |
+| `CTID` | *(auto)* | Proxmox container ID — auto-picks the next free one if unset |
 | `CT_HOSTNAME` | `hermes-webui` | Container hostname |
 | `STORAGE` | `local-lvm` | Where the container disk lives |
 | `BRIDGE` | `vmbr0` | Network bridge |

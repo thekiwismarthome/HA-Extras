@@ -6,15 +6,15 @@
 # shell) — it uses `pct`, which only exists there.
 #
 # Usage:
-#   ./create-lxc.sh
-#   CTID=910 WEBUI_PASSWORD='change-me' ./create-lxc.sh
+#   ./create-lxc.sh                                # auto-picks the next free CTID, prompts for a password
+#   CTID=910 WEBUI_PASSWORD='change-me' ./create-lxc.sh   # fully non-interactive
 #
 # All settings can be overridden via environment variables before running.
 
 set -euo pipefail
 
 # ---- Container settings (override via env) --------------------------------
-CTID="${CTID:-900}"
+CTID="${CTID:-}"                             # blank = auto-pick the next free ID
 CT_HOSTNAME="${CT_HOSTNAME:-hermes-webui}"
 DISK_SIZE_GB="${DISK_SIZE_GB:-8}"
 MEMORY_MB="${MEMORY_MB:-2048}"
@@ -50,9 +50,33 @@ if ! command -v pct >/dev/null 2>&1; then
 fi
 
 if [ -z "$WEBUI_PASSWORD" ] && [ "$WEBUI_HOST" != "127.0.0.1" ]; then
-  echo "WARNING: WEBUI_HOST=$WEBUI_HOST exposes the UI on the LAN with no password set." >&2
-  echo "         Set WEBUI_PASSWORD before running, or Ctrl-C now and rerun with it." >&2
-  sleep 5
+  if [ -t 0 ]; then
+    echo "Set a password for Hermes WebUI (it'll be reachable on your LAN at ${WEBUI_HOST}:${WEBUI_PORT})."
+    while true; do
+      read -r -s -p "Password (leave blank to skip, not recommended): " WEBUI_PASSWORD
+      echo
+      if [ -z "$WEBUI_PASSWORD" ]; then
+        echo "WARNING: continuing with no password." >&2
+        break
+      fi
+      read -r -s -p "Confirm password: " WEBUI_PASSWORD_CONFIRM
+      echo
+      if [ "$WEBUI_PASSWORD" = "$WEBUI_PASSWORD_CONFIRM" ]; then
+        break
+      fi
+      echo "Passwords didn't match, try again." >&2
+    done
+    unset WEBUI_PASSWORD_CONFIRM
+  else
+    echo "WARNING: WEBUI_HOST=$WEBUI_HOST exposes the UI on the LAN with no password set." >&2
+    echo "         Pass WEBUI_PASSWORD='...' when running non-interactively (e.g. curl | bash)." >&2
+    sleep 5
+  fi
+fi
+
+if [ -z "$CTID" ]; then
+  CTID="$(pvesh get /cluster/nextid)"
+  echo "==> No CTID given, using next free ID: $CTID"
 fi
 
 if pct status "$CTID" >/dev/null 2>&1; then
