@@ -37,6 +37,13 @@ It then creates the container, waits for networking, and pulls and runs
 [`install.sh`](./install.sh) inside it automatically. When it finishes it
 prints the URL to open, e.g. `http://192.168.1.50:8787`.
 
+**Give it several minutes.** Most of that time is Hermes Agent's own
+installer (a separate NousResearch project, not something this script
+controls) pulling in Node.js, Playwright/Chromium, and its Python
+dependencies — it goes quiet for stretches with no progress bar. That's
+normal; it's only actually stuck if a process is no longer running at all
+(check with `ps aux` from a second `pct enter` session).
+
 For scripted/non-interactive runs, skip the prompt by setting `CTID` and
 `WEBUI_PASSWORD` up front:
 
@@ -109,6 +116,35 @@ curl -fsSL https://raw.githubusercontent.com/thekiwismarthome/HA-Extras/main/her
 It stops the running service, `git pull`s the latest hermes-webui, re-runs
 bootstrap to pick up new dependencies, and restarts the service. Your `.env`
 (including your password) is left untouched.
+
+## Migrating settings from another LXC
+
+All persistent state — Hermes Agent's own config/memory and the WebUI's
+sessions/provider API keys — lives under `HERMES_HOME`
+(`/home/hermes/.hermes/` inside the container). To copy it from an old
+instance into a new one, on the **Proxmox host** with both containers
+running:
+
+```bash
+pct exec <OLD_CTID> -- systemctl stop hermes-webui
+pct exec <NEW_CTID> -- systemctl stop hermes-webui
+
+pct exec <OLD_CTID> -- tar czf - -C /home/hermes .hermes \
+  | pct exec <NEW_CTID> -- tar xzf - -C /home/hermes
+
+pct exec <NEW_CTID> -- chown -R hermes:hermes /home/hermes/.hermes
+pct exec <NEW_CTID> -- systemctl start hermes-webui
+```
+
+That pipes a tar stream straight from one container to the other through
+the host — no SSH or networking between the containers needed. If you also
+want the old WebUI login password to carry over (rather than keeping the
+new one), copy `/opt/hermes-webui/.env` the same way instead of setting a
+new `WEBUI_PASSWORD`.
+
+This covers everything Hermes itself manages under `HERMES_HOME` by
+design; it won't catch state some other, unrelated tool decided to store
+outside that directory.
 
 ## Uninstalling
 
