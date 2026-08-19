@@ -32,6 +32,17 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+ENV_FILE="${HERMES_INSTALL_DIR}/.env"
+
+# Preserve a previously-set password across re-runs (e.g. updates) so it
+# isn't silently wiped just because this invocation didn't pass one in.
+if [ -z "$WEBUI_PASSWORD" ] && [ -f "$ENV_FILE" ]; then
+  EXISTING_PASSWORD="$(grep -m1 '^HERMES_WEBUI_PASSWORD=' "$ENV_FILE" 2>/dev/null | cut -d= -f2-)"
+  if [ -n "$EXISTING_PASSWORD" ]; then
+    WEBUI_PASSWORD="$EXISTING_PASSWORD"
+  fi
+fi
+
 if [ -z "$WEBUI_PASSWORD" ] && [ "$WEBUI_HOST" != "127.0.0.1" ]; then
   echo "WARNING: WEBUI_HOST=$WEBUI_HOST with no WEBUI_PASSWORD set — the UI will be" >&2
   echo "         reachable, unauthenticated, to anything on that network." >&2
@@ -66,7 +77,6 @@ else
 fi
 
 echo "==> Writing ${HERMES_INSTALL_DIR}/.env"
-ENV_FILE="${HERMES_INSTALL_DIR}/.env"
 {
   echo "HERMES_HOME=${HERMES_STATE_HOME}"
   echo "HERMES_WEBUI_HOST=${WEBUI_HOST}"
@@ -88,7 +98,7 @@ sudo -u "$HERMES_USER" env -i \
   HERMES_HOME="$HERMES_STATE_HOME" \
   HERMES_WEBUI_SKIP_ONBOARDING=1 \
   ${WEBUI_PASSWORD:+HERMES_WEBUI_PASSWORD="$WEBUI_PASSWORD"} \
-  bash -c "cd '$HERMES_INSTALL_DIR' && python3 bootstrap.py --host '$WEBUI_HOST' --port '$WEBUI_PORT' --no-browser"
+  bash -c "cd '$HERMES_INSTALL_DIR' && python3 bootstrap.py '$WEBUI_PORT' --host '$WEBUI_HOST' --no-browser"
 
 echo "==> Stopping the ad-hoc bootstrap instance (systemd will own it from here)"
 sudo -u "$HERMES_USER" env -i \
