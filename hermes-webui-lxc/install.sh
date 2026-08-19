@@ -53,7 +53,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends \
   python3 python3-venv python3-pip git curl ca-certificates sudo \
-  xz-utils tar gzip unzip build-essential
+  xz-utils tar gzip unzip build-essential ripgrep ffmpeg
 
 echo "==> Ensuring service user '${HERMES_USER}' exists"
 if ! id -u "$HERMES_USER" >/dev/null 2>&1; then
