@@ -52,8 +52,8 @@ echo "==> Installing base packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends \
-  python3 python3-venv python3-pip git curl ca-certificates sudo \
-  xz-utils tar gzip unzip build-essential ripgrep ffmpeg
+  python3 python3-venv python3-pip python3-dev git curl ca-certificates sudo \
+  xz-utils tar gzip unzip build-essential libffi-dev ripgrep ffmpeg
 
 echo "==> Ensuring service user '${HERMES_USER}' exists"
 if ! id -u "$HERMES_USER" >/dev/null 2>&1; then
@@ -61,6 +61,15 @@ if ! id -u "$HERMES_USER" >/dev/null 2>&1; then
 fi
 mkdir -p "$HERMES_HOME_DIR"
 chown "$HERMES_USER":"$HERMES_USER" "$HERMES_HOME_DIR"
+
+# Hermes Agent's own installer sometimes shells out to `sudo apt-get install`
+# for optional packages it decides it wants (seen so far: ripgrep/ffmpeg,
+# build-essential/python3-dev/libffi-dev). We preinstall the known ones above,
+# but rather than keep chasing new ones one at a time, give the unprivileged
+# service account narrowly-scoped passwordless sudo for apt-get only, so any
+# future prompt like that resolves itself instead of hanging forever.
+echo "${HERMES_USER} ALL=(root) NOPASSWD: /usr/bin/apt-get" > /etc/sudoers.d/hermes-webui-apt
+chmod 440 /etc/sudoers.d/hermes-webui-apt
 
 echo "==> Stopping existing service (if any) before update"
 if systemctl list-unit-files "${SERVICE_NAME}.service" >/dev/null 2>&1 \

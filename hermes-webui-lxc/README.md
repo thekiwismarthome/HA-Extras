@@ -69,6 +69,13 @@ Check `pveam available | grep debian-12` if the pinned template version in
 
 ## Running install.sh standalone
 
+> ⚠️ If you're troubleshooting on a Proxmox box, double check your prompt
+> before running this — it's easy to still be at the **Proxmox host's** shell
+> instead of inside the container. `install.sh` does `apt-get install`,
+> creates a `hermes` user, and installs a systemd service; you don't want
+> that landing on the host. `pct enter <CTID>` first, and confirm with
+> `hostname` (should be your container's hostname, not the Proxmox host's).
+
 `install.sh` doesn't need Proxmox or `create-lxc.sh` — it works on any
 Debian/Ubuntu box with systemd (a plain VM, bare metal, a manually-created
 LXC, etc.):
@@ -110,6 +117,16 @@ bootstrap to pick up new dependencies, and restarts the service. Your `.env`
 pct stop <CTID>
 pct destroy <CTID>
 ```
+
+## Security notes
+
+- The `hermes` service account has no password and a `nologin` shell — it
+  can't log in interactively.
+- Hermes Agent's own installer occasionally shells out to `sudo apt-get
+  install` for optional packages it wants (ripgrep, ffmpeg, build tools,
+  etc.). Rather than hang waiting for a password that doesn't exist, the
+  installer grants `hermes` narrowly-scoped passwordless sudo for `apt-get`
+  only (`/etc/sudoers.d/hermes-webui-apt`) — not full root.
 
 ## Post-install
 
