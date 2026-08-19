@@ -1,0 +1,1590 @@
+square: true
+type: grid
+columns: 4
+cards:
+  - type: custom:button-card
+    entity: light.lounge_dimmer_2
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          hass.callService('light', 'toggle', { entity_id: entity.entity_id });
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      light_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="light-svg">
+          <circle cx="120" cy="120" r="var(--halo-r, 104)" class="halo" fill="var(--light-color)" opacity="var(--halo-op, 0)"></circle>
+          <circle cx="120" cy="120" r="66" class="aperture-glow" fill="var(--light-color)" opacity="var(--aperture-op, 0)"></circle>
+          <g class="fixture">
+            <circle cx="120" cy="120" r="94" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)"></circle>
+            <circle cx="120" cy="120" r="86" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-fine, 0.8)" opacity="var(--fine-op, 0.25)"></circle>
+            <circle cx="120" cy="120" r="66" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)"></circle>
+            <circle cx="120" cy="120" r="58" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-fine, 0.8)" opacity="var(--fine-op-2, 0.3)"></circle>
+            <path d="M76 120 A44 44 0 0 1 120 76" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)" stroke-linecap="round" class="bevel"></path>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        light_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 110%
+          - height: 110%
+          - --card-background-color: '#000000'
+          - --light-color: |
+              [[[
+                if (entity.state !== 'on') return '#FFFFFF';
+                const p = (entity.attributes.brightness || 255) / 255;
+                const r = Math.round(224 + p * 31);
+                const g = Math.round(140 + p * 100);
+                const b = Math.round(30  + p * 166);
+                return 'rgb(' + r + ',' + g + ',' + b + ')';
+              ]]]
+          - --stroke-main: |
+              [[[
+                if (entity.state !== 'on') return '3.4';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (3.4 + p * 1.2).toFixed(2);
+              ]]]
+          - --stroke-fine: |
+              [[[
+                if (entity.state !== 'on') return '1.2';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (1.2 + p * 0.2).toFixed(2);
+              ]]]
+          - --fine-op: |
+              [[[
+                if (entity.state !== 'on') return '0.45';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.45 + p * 0.15).toFixed(2);
+              ]]]
+          - --fine-op-2: |
+              [[[
+                if (entity.state !== 'on') return '0.5';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.5 + p * 0.15).toFixed(2);
+              ]]]
+          - --aperture-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.05 + p * 0.21).toFixed(3);
+              ]]]
+          - --halo-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.04 + p * 0.13).toFixed(3);
+              ]]]
+          - --halo-r: |
+              [[[
+                if (entity.state !== 'on') return '104';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (104 + p * 14).toFixed(0);
+              ]]]
+          - filter: |
+              [[[
+                if (entity.state !== 'on') return 'none';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return 'drop-shadow(0 0 ' + (3 + p * 16).toFixed(1) + 'px rgba(255,214,130,' + (0.2 + p * 0.55).toFixed(2) + '))';
+              ]]]
+    extra_styles: >
+      .light-svg { width: 100%; height: 100%; display: block; }
+
+
+      .fixture circle, .fixture path { transition: stroke .45s ease,
+      stroke-width .45s ease, opacity .45s ease; }
+
+      .aperture-glow, .halo { transition: opacity .45s ease, r .45s ease; }
+  - type: custom:button-card
+    entity: climate.ac_living_room
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          const svc = entity.state === 'off' ? 'turn_on' : 'turn_off';
+          hass.callService('climate', svc, { entity_id: entity.entity_id });
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      mode_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="climate-svg">
+          <circle cx="120" cy="120" r="110" class="halo" fill="var(--climate-color)" opacity="0.06"></circle>
+          <g class="unit">
+            <rect x="38" y="62" width="164" height="63" rx="19" fill="var(--card-background-color, #000)" stroke="var(--climate-color)" stroke-width="3.5"></rect>
+            <rect x="46" y="70" width="148" height="47" rx="14" fill="none" stroke="var(--climate-color)" stroke-width="0.8" opacity="0.25"></rect>
+            <path d="M38 105 H202" fill="none" stroke="var(--climate-color)" stroke-width="2.5"></path>
+            <path d="M62 84 H100" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round"></path>
+            <path d="M62 93 H88" fill="none" stroke="var(--climate-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+            <circle cx="180" cy="88" r="5" fill="var(--climate-color)" opacity="0.35" class="status-dot"></circle>
+          </g>
+          <g class="airflow">
+            <path d="M82 158 q19 -22 38 0 t38 0" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round" class="wave w1"></path>
+            <path d="M91 192 q14 -17 29 0 t29 0" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round" class="wave w2"></path>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        mode_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 110%
+          - height: 110%
+          - --card-background-color: '#000000'
+          - --climate-color: '#FFFFFF'
+    extra_styles: >
+      .climate-svg { width: 100%; height: 100%; display: block; }
+
+
+      .halo { transform-box: fill-box; transform-origin: center;
+              animation: acHalo 3.5s ease-in-out infinite;
+              animation-play-state: var(--halo-play, paused); }
+
+      .status-dot { animation: acPulse 2.6s ease-in-out infinite;
+                    animation-play-state: var(--dot-play, paused); }
+
+
+      .wave { opacity: var(--wave-op, 0); transition: opacity .4s; }
+
+      .w1 { animation: acDrift 3.2s ease-in-out infinite;
+            animation-play-state: var(--wave-play, paused); }
+
+      .w2 { animation: acDrift 3.2s ease-in-out infinite .5s;
+            animation-play-state: var(--wave-play, paused); }
+
+
+      @keyframes acHalo { 0%, 100% { opacity: .04; } 50% { opacity: .13; } }
+
+      @keyframes acPulse { 0%, 100% { opacity: .25; } 50% { opacity: .6; } }
+
+      @keyframes acDrift { 0%, 100% { transform: translateY(0); } 50% {
+      transform: translateY(5px); } }
+    state:
+      - value: heat
+        styles:
+          custom_fields:
+            mode_graphic:
+              - --climate-color: '#FF6B35'
+              - --halo-play: running
+              - --dot-play: running
+              - --wave-play: running
+              - --wave-op: 1
+              - filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.55))
+      - value: cool
+        styles:
+          custom_fields:
+            mode_graphic:
+              - --climate-color: '#00A1E4'
+              - --halo-play: running
+              - --dot-play: running
+              - --wave-play: running
+              - --wave-op: 1
+              - filter: drop-shadow(0 0 8px rgba(0, 161, 228, 0.55))
+      - value: dry
+        styles:
+          custom_fields:
+            mode_graphic:
+              - --climate-color: '#26C6DA'
+              - --halo-play: running
+              - --dot-play: running
+              - --wave-play: running
+              - --wave-op: 1
+              - filter: drop-shadow(0 0 8px rgba(38, 198, 218, 0.5))
+      - value: auto
+        styles:
+          custom_fields:
+            mode_graphic:
+              - --climate-color: '#34C759'
+              - --halo-play: running
+              - --dot-play: running
+              - --wave-play: running
+              - --wave-op: 1
+              - filter: drop-shadow(0 0 8px rgba(52, 199, 89, 0.5))
+      - value: 'off'
+        styles:
+          custom_fields:
+            mode_graphic:
+              - --climate-color: '#FFFFFF'
+              - --wave-op: 1
+  - type: custom:button-card
+    entity: vacuum.wall_e
+    triggers_update:
+      - binary_sensor.wall_e_bin_full
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          const s = entity.state;
+          let svc = 'start';
+          if (s === 'cleaning' || s === 'returning') svc = 'pause';
+          else if (s === 'error') svc = 'locate';
+          hass.callService('vacuum', svc, { entity_id: entity.entity_id });
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      vacuum_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="vacuum-svg">
+          <circle cx="120" cy="120" r="110" class="glow" fill="var(--vacuum-color)" opacity="0.06"></circle>
+          <g class="vacuum-body-rotate">
+            <g class="vacuum-body">
+              <g class="brush brush-right">
+                <g class="brush-spokes">
+                  <line x1="174" y1="76" x2="174" y2="64" stroke="var(--vacuum-color)" stroke-width="1.2" stroke-linecap="round" opacity="0.5"></line>
+                  <line x1="174" y1="76" x2="174" y2="88" stroke="var(--vacuum-color)" stroke-width="1.2" stroke-linecap="round" opacity="0.5"></line>
+                  <line x1="174" y1="76" x2="162" y2="76" stroke="var(--vacuum-color)" stroke-width="1.2" stroke-linecap="round" opacity="0.5"></line>
+                  <line x1="174" y1="76" x2="186" y2="76" stroke="var(--vacuum-color)" stroke-width="1.2" stroke-linecap="round" opacity="0.5"></line>
+                </g>
+                <circle cx="174" cy="76" r="2" fill="var(--vacuum-color)" opacity="0.5"></circle>
+              </g>
+              <circle cx="120" cy="120" r="72" fill="var(--card-background-color, #fff)" stroke="var(--vacuum-color)" stroke-width="3.5"></circle>
+              <circle cx="120" cy="120" r="66" fill="none" stroke="var(--vacuum-color)" stroke-width="0.8" opacity="0.2"></circle>
+              <path d="M 60 94 A 68 68 0 0 1 180 94" fill="none" stroke="var(--vacuum-color)" stroke-width="2.5" stroke-linecap="round" class="bumper"></path>
+              <g class="nav-lines" opacity="0.15">
+                <line x1="120" y1="56" x2="120" y2="74" stroke="var(--vacuum-color)" stroke-width="1.5"></line>
+                <line x1="88" y1="63" x2="96" y2="78" stroke="var(--vacuum-color)" stroke-width="1.5"></line>
+                <line x1="152" y1="63" x2="144" y2="78" stroke="var(--vacuum-color)" stroke-width="1.5"></line>
+              </g>
+              <circle cx="120" cy="108" r="14" fill="var(--card-background-color, #fff)" stroke="var(--vacuum-color)" stroke-width="2.5" class="lidar-housing"></circle>
+              <circle cx="120" cy="108" r="9" fill="none" stroke="var(--vacuum-color)" stroke-width="0.8" opacity="0.25"></circle>
+              <circle cx="120" cy="140" r="8" fill="var(--vacuum-color)" opacity="0.08" class="power-ring"></circle>
+              <circle cx="120" cy="140" r="4" fill="var(--vacuum-color)" opacity="0.25" class="power-dot"></circle>
+            </g>
+          </g>
+          <g class="particles">
+            <circle class="particle p1" cx="120" cy="120" r="2" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p2" cx="120" cy="120" r="1.5" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p3" cx="120" cy="120" r="1.5" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p4" cx="120" cy="120" r="2" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p5" cx="120" cy="120" r="1.5" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p6" cx="120" cy="120" r="1.5" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p7" cx="120" cy="120" r="1" fill="var(--vacuum-color)"></circle>
+            <circle class="particle p8" cx="120" cy="120" r="1" fill="var(--vacuum-color)"></circle>
+          </g>
+          <g class="dock-indicator">
+            <rect x="76" y="188" width="88" height="28" rx="8" fill="var(--card-background-color, #fff)" stroke="var(--vacuum-color)" stroke-width="3.5"></rect>
+          </g>
+          <g class="return-path">
+            <polygon points="120,220 110,206 130,206" fill="var(--vacuum-color)" stroke="var(--vacuum-color)" stroke-width="3.5" stroke-linejoin="round" opacity="0.55"></polygon>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        vacuum_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 110%
+          - height: 110%
+          - --vacuum-color: '#D2D2D2'
+          - --card-background-color: '#000000'
+    state:
+      - operator: template
+        value: '[[[ return states[''binary_sensor.wall_e_bin_full''].state === ''on''; ]]]'
+        styles:
+          custom_fields:
+            vacuum_graphic:
+              - --vacuum-color: '#FF9F0A'
+              - --body-fx: vacPulse 2.5s ease-in-out infinite
+      - value: cleaning
+        styles:
+          custom_fields:
+            vacuum_graphic:
+              - --vacuum-color: '#00A1E4'
+              - --brush-play: running
+              - --nav-play: running
+              - --glow-play: running
+              - --particles-op: 1
+              - --particles-play: running
+      - value: returning
+        styles:
+          custom_fields:
+            vacuum_graphic:
+              - --vacuum-color: '#7E8083'
+              - --brush-play: running
+              - --dock-op: 1
+              - --return-op: 1
+      - value: docked
+        styles:
+          custom_fields:
+            vacuum_graphic:
+              - --vacuum-color: '#FFFFFF'
+              - --dock-op: 1
+      - value: error
+        styles:
+          custom_fields:
+            vacuum_graphic:
+              - --vacuum-color: '#FF3B30'
+              - --body-fx: vacBlink 1s steps(2) infinite
+    extra_styles: >
+      .vacuum-svg { width: 100%; height: 100%; display: block; }
+
+
+      .glow { transform-box: fill-box; transform-origin: center;
+              animation: vacGlow 3s ease-in-out infinite; animation-play-state: var(--glow-play, paused); }
+      .brush-spokes { transform-box: fill-box; transform-origin: center;
+                      animation: vacSpin 1.6s linear infinite; animation-play-state: var(--brush-play, paused); }
+      .vacuum-body-rotate { transform-box: view-box; transform-origin: 120px
+      120px;
+                            animation: vacTurn 7s ease-in-out infinite; animation-play-state: var(--nav-play, paused); }
+      .vacuum-body { animation: var(--body-fx, none); }
+
+
+      .particles { opacity: var(--particles-op, 0); transition: opacity .3s; }
+
+      .particle { transform-box: fill-box; animation: vacSuck 1.8s ease-in
+      infinite;
+                  animation-play-state: var(--particles-play, paused); }
+      .p1 { --dx: 60px;  --dy: -40px; animation-delay: 0s; }
+
+      .p2 { --dx: -55px; --dy: 35px;  animation-delay: .35s; }
+
+      .p3 { --dx: 45px;  --dy: 55px;  animation-delay: .7s; }
+
+      .p4 { --dx: -60px; --dy: -30px; animation-delay: 1.05s; }
+
+      .p5 { --dx: 30px;  --dy: -60px; animation-delay: .5s; }
+
+      .p6 { --dx: -40px; --dy: -52px; animation-delay: .9s; }
+
+      .p7 { --dx: 58px;  --dy: 22px;  animation-delay: .2s; }
+
+      .p8 { --dx: -25px; --dy: 60px;  animation-delay: 1.2s; }
+
+
+      .dock-indicator { opacity: var(--dock-op, 0); transition: opacity .3s; }
+
+      .return-path { opacity: var(--return-op, 0); transition: opacity .3s; }
+
+
+      @keyframes vacSpin { to { transform: rotate(360deg); } }
+
+      @keyframes vacTurn { 0%, 100% { transform: rotate(0deg); } 30% {
+      transform: rotate(-12deg); } 70% { transform: rotate(12deg); } }
+
+      @keyframes vacGlow { 0%, 100% { opacity: .04; } 50% { opacity: .14; } }
+
+      @keyframes vacSuck { 0% { transform: translate(var(--dx), var(--dy));
+      opacity: 0; } 22% { opacity: .85; } 100% { transform: translate(0, 0);
+      opacity: 0; } }
+
+      @keyframes vacBlink { 50% { opacity: .25; } }
+
+      @keyframes vacPulse { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  - type: custom:button-card
+    entity: light.ambilight_living_room
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          hass.callService('light', 'toggle', { entity_id: entity.entity_id });
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      ambi_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="ambi-svg">
+          <circle cx="120" cy="112" r="106" class="halo" fill="var(--ambi-color)" opacity="0.06"></circle>
+          <g class="spill" opacity="var(--spill-op, 0)">
+            <rect x="30" y="46" width="180" height="120" rx="26" fill="var(--ambi-color)" opacity="0.1" class="spill-outer"></rect>
+            <rect x="42" y="56" width="156" height="100" rx="20" fill="var(--ambi-color)" opacity="0.12"></rect>
+          </g>
+          <g class="led-strip" opacity="var(--strip-op, 0)">
+            <line x1="66" y1="58" x2="102" y2="58" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l1"></line>
+            <line x1="138" y1="58" x2="174" y2="58" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l2"></line>
+            <line x1="182" y1="82" x2="182" y2="118" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l3"></line>
+            <line x1="138" y1="142" x2="174" y2="142" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l4"></line>
+            <line x1="66" y1="142" x2="102" y2="142" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l5"></line>
+            <line x1="58" y1="82" x2="58" y2="118" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l6"></line>
+          </g>
+          <g class="fixture">
+            <rect x="54" y="66" width="132" height="84" rx="10" fill="var(--card-background-color, #000)" stroke="var(--ambi-color)" stroke-width="3.5" class="panel"></rect>
+            <rect x="62" y="74" width="116" height="68" rx="6" fill="none" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.25"></rect>
+            <rect x="76" y="88" width="88" height="40" rx="4" fill="var(--ambi-color)" opacity="0.1" class="screen-glow"></rect>
+            <path d="M104 118 v-16 l14 8 z" fill="none" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linejoin="round" class="play-mark"></path>
+            <path d="M96 96 h-6 M96 120 h-6" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+            <path d="M144 96 h6 M144 120 h6" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+            <line x1="120" y1="150" x2="120" y2="166" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linecap="round" opacity="0.55"></line>
+            <path d="M92 176 H148" fill="none" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linecap="round"></path>
+            <circle cx="120" cy="166" r="4" fill="var(--ambi-color)" opacity="0.35" class="stand-dot"></circle>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        ambi_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 110%
+          - height: 110%
+          - --card-background-color: '#000000'
+          - --ambi-color: '#6B6E70'
+          - --spill-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const b = entity.attributes.brightness || 255;
+                return (0.4 + (b / 255) * 0.6).toFixed(2);
+              ]]]
+          - --strip-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const b = entity.attributes.brightness || 255;
+                return (0.45 + (b / 255) * 0.55).toFixed(2);
+              ]]]
+    state:
+      - value: 'on'
+        styles:
+          custom_fields:
+            ambi_graphic:
+              - --halo-play: running
+              - --glow-play: running
+              - --hue-play: running
+              - --ambi-color: '#FFC65C'
+              - animation: ambiHue 14s linear infinite
+      - value: 'off'
+        styles:
+          custom_fields:
+            ambi_graphic:
+              - --ambi-color: '#FFFFFF'
+    extra_styles: |
+      .ambi-svg { width: 100%; height: 100%; display: block; }
+
+      .halo { transform-box: fill-box; transform-origin: center;
+              animation: ambiHalo 4s ease-in-out infinite; animation-play-state: var(--halo-play, paused); }
+
+      .screen-glow { transform-box: fill-box; transform-origin: center;
+                     animation: ambiPulse 3.5s ease-in-out infinite; animation-play-state: var(--glow-play, paused); }
+
+
+      .spill { transition: opacity .5s; }
+      .led-strip { transition: opacity .5s; }
+
+      .led { animation: ambiBreathe 4.5s ease-in-out infinite;
+             animation-play-state: var(--hue-play, paused); }
+
+      .l1 { animation-delay: 0s; }
+      .l2 { animation-delay: .6s; }
+      .l3 { animation-delay: 1.2s; }
+      .l4 { animation-delay: 1.8s; }
+      .l5 { animation-delay: 2.4s; }
+      .l6 { animation-delay: 3s; }
+
+      @keyframes ambiHalo { 0%, 100% { opacity: .05; } 50% { opacity: .14; } }
+      @keyframes ambiPulse { 0%, 100% { opacity: .08; } 50% { opacity: .18; } }
+      @keyframes ambiBreathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+      @keyframes ambiHue {
+        0%   { --ambi-color: #FFC65C; }
+        16%  { --ambi-color: #FF6B8A; }
+        33%  { --ambi-color: #B06BFF; }
+        50%  { --ambi-color: #00A1E4; }
+        66%  { --ambi-color: #26C6DA; }
+        83%  { --ambi-color: #34C759; }
+        100% { --ambi-color: #FFC65C; }
+      }
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: remote.tv_samsung_led65
+        state: 'on'
+    card:
+      type: custom:button-card
+      entity: remote.tv_samsung_led65
+      aspect_ratio: 1/1
+      show_name: false
+      show_state: false
+      show_icon: false
+      tap_action:
+        action: javascript
+        haptic: heavy
+        javascript: |
+          [[[
+            try {
+              const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+              if (ctx.state === 'suspended') ctx.resume();
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              o.frequency.value = 900;
+              g.gain.setValueAtTime(0.25, ctx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+              o.connect(g); g.connect(ctx.destination);
+              o.start(); o.stop(ctx.currentTime + 0.05);
+            } catch (e) {}
+            hass.callService('remote', 'toggle', { entity_id: entity.entity_id });
+          ]]]
+      hold_action:
+        action: none
+      custom_fields:
+        tv_graphic: >
+          <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+          class="tv-svg">
+            <circle cx="120" cy="120" r="110" fill="var(--tv-color)" opacity="var(--halo-op, 0.08)"></circle>
+            <circle cx="120" cy="120" r="94" fill="none" stroke="var(--tv-color)" stroke-width="3.4"></circle>
+            <circle cx="120" cy="120" r="86" fill="none" stroke="var(--tv-color)" stroke-width="1.2" opacity="0.45"></circle>
+            <g class="tv">
+              <rect x="66" y="74" width="108" height="72" rx="8" fill="var(--card-background-color, #000)" stroke="var(--tv-color)" stroke-width="3.4"></rect>
+              <rect x="74" y="82" width="92" height="56" rx="4" fill="none" stroke="var(--tv-color)" stroke-width="1.2" opacity="0.4"></rect>
+              <path d="M104 166 H136" fill="none" stroke="var(--tv-color)" stroke-width="3.4" stroke-linecap="round"></path>
+              <path d="M120 146 V166" fill="none" stroke="var(--tv-color)" stroke-width="3.4" stroke-linecap="round"></path>
+            </g>
+            <g class="power" opacity="var(--power-op, 0)">
+              <circle cx="120" cy="110" r="22" fill="var(--card-background-color, #000)"></circle>
+              <path d="M120 92 V108" fill="none" stroke="var(--tv-color)" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M107 100 a17 17 0 1 0 26 0" fill="none" stroke="var(--tv-color)" stroke-width="4" stroke-linecap="round"></path>
+            </g>
+          </svg>
+      styles:
+        card:
+          - padding: 0px
+          - background-color: transparent
+          - box-shadow: none
+          - border: none
+        grid:
+          - position: relative
+        custom_fields:
+          tv_graphic:
+            - position: absolute
+            - top: 50%
+            - left: 50%
+            - transform: translate(-50%, -50%)
+            - width: 105%
+            - height: 105%
+            - --card-background-color: '#000000'
+            - --tv-color: '#9BA0A3'
+            - --halo-op: '0.08'
+      extra_styles: >
+        .tv-svg { width: 100%; height: 100%; display: block; }
+
+
+        .tv rect, .tv path, .power path, .power circle, .tv-svg > circle {
+        transition: stroke .3s ease, opacity .3s ease; }
+
+        .power { transition: opacity .3s ease; }
+      state:
+        - value: 'on'
+          styles:
+            custom_fields:
+              tv_graphic:
+                - --tv-color: '#00A1E4'
+                - --power-op: 1
+                - --halo-op: 0.12
+                - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.45))
+        - value: 'off'
+          styles:
+            custom_fields:
+              tv_graphic:
+                - --tv-color: '#FFFFFF'
+                - --power-op: 0
+  - type: custom:button-card
+    entity: light.office_play_room_light_switch_1
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          hass.callService('light', 'toggle', { entity_id: entity.entity_id });
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      light_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="light-svg">
+          <circle cx="120" cy="120" r="var(--halo-r, 104)" class="halo" fill="var(--light-color)" opacity="var(--halo-op, 0)"></circle>
+          <circle cx="120" cy="120" r="66" class="aperture-glow" fill="var(--light-color)" opacity="var(--aperture-op, 0)"></circle>
+          <g class="fixture">
+            <circle cx="120" cy="120" r="94" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)"></circle>
+            <circle cx="120" cy="120" r="86" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-fine, 0.8)" opacity="var(--fine-op, 0.25)"></circle>
+            <circle cx="120" cy="120" r="66" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)"></circle>
+            <circle cx="120" cy="120" r="58" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-fine, 0.8)" opacity="var(--fine-op-2, 0.3)"></circle>
+            <path d="M76 120 A44 44 0 0 1 120 76" fill="none" stroke="var(--light-color)" stroke-width="var(--stroke-main, 2.5)" stroke-linecap="round" class="bevel"></path>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        light_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 110%
+          - height: 110%
+          - --card-background-color: '#000000'
+          - --light-color: |
+              [[[
+                if (entity.state !== 'on') return '#FFFFFF';
+                const p = (entity.attributes.brightness || 255) / 255;
+                const r = Math.round(224 + p * 31);
+                const g = Math.round(140 + p * 100);
+                const b = Math.round(30  + p * 166);
+                return 'rgb(' + r + ',' + g + ',' + b + ')';
+              ]]]
+          - --stroke-main: |
+              [[[
+                if (entity.state !== 'on') return '3.4';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (3.4 + p * 1.2).toFixed(2);
+              ]]]
+          - --stroke-fine: |
+              [[[
+                if (entity.state !== 'on') return '1.2';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (1.2 + p * 0.2).toFixed(2);
+              ]]]
+          - --fine-op: |
+              [[[
+                if (entity.state !== 'on') return '0.45';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.45 + p * 0.15).toFixed(2);
+              ]]]
+          - --fine-op-2: |
+              [[[
+                if (entity.state !== 'on') return '0.5';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.5 + p * 0.15).toFixed(2);
+              ]]]
+          - --aperture-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.05 + p * 0.21).toFixed(3);
+              ]]]
+          - --halo-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.04 + p * 0.13).toFixed(3);
+              ]]]
+          - --halo-r: |
+              [[[
+                if (entity.state !== 'on') return '104';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (104 + p * 14).toFixed(0);
+              ]]]
+          - filter: |
+              [[[
+                if (entity.state !== 'on') return 'none';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return 'drop-shadow(0 0 ' + (3 + p * 16).toFixed(1) + 'px rgba(255,214,130,' + (0.2 + p * 0.55).toFixed(2) + '))';
+              ]]]
+    extra_styles: >
+      .light-svg { width: 100%; height: 100%; display: block; }
+
+
+      .fixture circle, .fixture path { transition: stroke .45s ease,
+      stroke-width .45s ease, opacity .45s ease; }
+
+      .aperture-glow, .halo { transition: opacity .45s ease, r .45s ease; }
+  - type: custom:button-card
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          const dashboard = window.location.pathname.split('/')[1] || 'lovelace';
+          history.pushState(null, '', '/' + dashboard + '/music');
+          window.dispatchEvent(new Event('location-changed'));
+        ]]]
+    hold_action:
+      action: none
+    custom_fields:
+      music_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="music-svg">
+          <circle cx="120" cy="120" r="110" fill="var(--music-color)" opacity="0.08"></circle>
+          <circle cx="120" cy="120" r="94" fill="none" stroke="var(--music-color)" stroke-width="3.4"></circle>
+          <circle cx="120" cy="120" r="86" fill="none" stroke="var(--music-color)" stroke-width="1.2" opacity="0.45"></circle>
+          <g class="eq">
+            <line x1="88"  y1="102" x2="88"  y2="138" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+            <line x1="104" y1="88"  x2="104" y2="152" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+            <line x1="120" y1="78"  x2="120" y2="162" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+            <line x1="136" y1="94"  x2="136" y2="146" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+            <line x1="152" y1="104" x2="152" y2="136" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+        - --music-color: '#00A1E4'
+      grid:
+        - position: relative
+      custom_fields:
+        music_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 100%
+          - height: 100%
+          - --card-background-color: '#000000'
+          - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.45))
+    extra_styles: |
+      .music-svg { width: 100%; height: 100%; display: block; }
+  - type: custom:button-card
+    entity: sensor.view_assist_timer_state
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          const dashboard = window.location.pathname.split('/')[1] || 'lovelace';
+          history.pushState(null, '', '/' + dashboard + '/alarms');
+          window.dispatchEvent(new Event('location-changed'));
+        ]]]
+    hold_action:
+      action: none
+    custom_fields:
+      alarm_graphic: |
+        [[[
+          const s = entity ? entity.state : 'idle';
+          const ringing = s === 'ringing';
+          const active  = s === 'active' || ringing;
+          const col = ringing ? '#FF3B30' : (active ? '#FF9F0A' : '#FFFFFF');
+          const ringPlay = ringing ? 'running' : 'paused';
+
+          return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="alarm-svg" style="--alarm-color:' + col + ';--ring-play:' + ringPlay + '">' +
+            '<circle cx="120" cy="120" r="110" fill="var(--alarm-color)" opacity="' + (active ? '0.12' : '0.08') + '"></circle>' +
+            '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--alarm-color)" stroke-width="3.4"></circle>' +
+            '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--alarm-color)" stroke-width="1.2" opacity="0.45"></circle>' +
+            '<g class="clock">' +
+              '<circle cx="120" cy="124" r="46" fill="var(--card-background-color, #000)" stroke="var(--alarm-color)" stroke-width="3.4"></circle>' +
+              '<circle cx="120" cy="124" r="38" fill="none" stroke="var(--alarm-color)" stroke-width="1.2" opacity="0.4"></circle>' +
+              '<path d="M120 124 V100" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+              '<path d="M120 124 L138 132" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+              '<circle cx="120" cy="124" r="3.5" fill="var(--alarm-color)"></circle>' +
+              '<path d="M84 82 L98 96" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+              '<path d="M156 82 L142 96" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+              '<path d="M90 70 a20 20 0 0 1 26 4" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+              '<path d="M150 70 a20 20 0 0 0 -26 4" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+            '</g>' +
+          '</svg>';
+        ]]]
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        alarm_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 105%
+          - height: 105%
+          - --card-background-color: '#000000'
+          - filter: |
+              [[[
+                const s = entity ? entity.state : 'idle';
+                if (s === 'ringing') return 'drop-shadow(0 0 14px rgba(255, 59, 48, 0.55))';
+                if (s === 'active')  return 'drop-shadow(0 0 12px rgba(255, 159, 10, 0.5))';
+                return 'none';
+              ]]]
+    extra_styles: |
+      .alarm-svg { width: 100%; height: 100%; display: block; }
+
+      .clock { transform-box: view-box; transform-origin: 120px 124px;
+               animation: alarmRing 0.5s ease-in-out infinite;
+               animation-play-state: var(--ring-play, paused); }
+
+
+      @keyframes alarmRing {
+        0%, 100% { transform: rotate(-5deg); }
+        50%      { transform: rotate(5deg); }
+      }
+  - type: custom:button-card
+    entity: light.sofa_lights
+    aspect_ratio: 1/1
+    show_name: false
+    show_state: false
+    show_icon: false
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          try {
+            const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = 900;
+            g.gain.setValueAtTime(0.25, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); o.stop(ctx.currentTime + 0.05);
+          } catch (e) {}
+          if (entity.state === 'on') {
+            hass.callService('light', 'turn_off', { entity_id: entity.entity_id });
+          } else {
+            hass.callService('light', 'turn_on', { entity_id: entity.entity_id, effect: 'solid' });
+          }
+        ]]]
+    hold_action:
+      action: more-info
+    custom_fields:
+      sofa_graphic: >
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+        class="sofa-svg">
+          <circle cx="120" cy="120" r="110" class="halo" fill="var(--sofa-color)" opacity="var(--halo-op, 0)"></circle>
+          <g transform="translate(120 141) scale(1.12) translate(-120 -141) translate(0 -21)">
+            <g class="backwash" opacity="var(--wash-op, 0)">
+              <rect x="26" y="70" width="188" height="86" rx="30" fill="var(--sofa-color)" opacity="0.1"></rect>
+              <rect x="40" y="80" width="160" height="70" rx="24" fill="var(--sofa-color)" opacity="0.12"></rect>
+            </g>
+            <g class="strip" opacity="var(--strip-op, 0)">
+              <line x1="62" y1="176" x2="98" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s1"></line>
+              <line x1="106" y1="176" x2="134" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s2"></line>
+              <line x1="142" y1="176" x2="178" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s3"></line>
+              <line x1="48" y1="140" x2="48" y2="164" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s4"></line>
+              <line x1="192" y1="140" x2="192" y2="164" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s5"></line>
+            </g>
+            <g class="furniture">
+              <path d="M56 116 q0 -22 22 -22 h84 q22 0 22 22 v18 h-128 Z" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linejoin="round" class="backrest"></path>
+              <path d="M70 108 q0 -8 8 -8 h84 q8 0 8 8" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.28"></path>
+              <path d="M120 96 v38" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.25"></path>
+              <rect x="40" y="128" width="26" height="42" rx="12" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" class="arm-l"></rect>
+              <rect x="174" y="128" width="26" height="42" rx="12" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" class="arm-r"></rect>
+              <path d="M62 134 h116 q10 0 10 12 v20 q0 8 -10 8 h-116 q-10 0 -10 -8 v-20 q0 -12 10 -12 Z" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linejoin="round" class="seat"></path>
+              <path d="M120 136 v36" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.25"></path>
+              <path d="M62 146 h116" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.2"></path>
+              <line x1="60" y1="174" x2="60" y2="188" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round"></line>
+              <line x1="180" y1="174" x2="180" y2="188" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round"></line>
+            </g>
+          </g>
+        </svg>
+    styles:
+      card:
+        - padding: 0px
+        - background-color: transparent
+        - box-shadow: none
+        - border: none
+      grid:
+        - position: relative
+      custom_fields:
+        sofa_graphic:
+          - position: absolute
+          - top: 50%
+          - left: 50%
+          - transform: translate(-50%, -50%)
+          - width: 100%
+          - height: 100%
+          - --card-background-color: '#000000'
+          - --sofa-color: |
+              [[[
+                if (entity.state !== 'on') return '#FFFFFF';
+                const rgb = entity.attributes.rgb_color;
+                if (rgb) return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return 'rgb(' + Math.round(224 + p * 31) + ',' +
+                                Math.round(140 + p * 100) + ',' +
+                                Math.round(30 + p * 166) + ')';
+              ]]]
+          - --wash-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.4 + p * 0.6).toFixed(2);
+              ]]]
+          - --strip-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.45 + p * 0.55).toFixed(2);
+              ]]]
+          - --halo-op: |
+              [[[
+                if (entity.state !== 'on') return '0';
+                const p = (entity.attributes.brightness || 255) / 255;
+                return (0.04 + p * 0.13).toFixed(3);
+              ]]]
+          - filter: |
+              [[[
+                if (entity.state !== 'on') return 'none';
+                const rgb = entity.attributes.rgb_color || [255, 214, 130];
+                const p = (entity.attributes.brightness || 255) / 255;
+                return 'drop-shadow(0 0 ' + (3 + p * 14).toFixed(1) + 'px rgba(' +
+                       rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (0.2 + p * 0.5).toFixed(2) + '))';
+              ]]]
+    extra_styles: >
+      .sofa-svg { width: 100%; height: 100%; display: block; }
+
+
+      .halo { transform-box: fill-box; transform-origin: center;
+              animation: sofaHalo 4s ease-in-out infinite;
+              animation-play-state: var(--halo-play, paused); }
+
+
+      .furniture path, .furniture rect, .furniture line { transition: stroke
+      .45s ease; }
+
+      .backwash { transition: opacity .5s ease; }
+
+      .strip { transition: opacity .5s ease; }
+
+
+      .led { animation: sofaBreathe 4.5s ease-in-out infinite;
+             animation-play-state: var(--led-play, paused); }
+
+      .s1 { animation-delay: 0s; }
+
+      .s2 { animation-delay: .5s; }
+
+      .s3 { animation-delay: 1s; }
+
+      .s4 { animation-delay: 1.5s; }
+
+      .s5 { animation-delay: 2s; }
+
+
+      @keyframes sofaHalo { 0%, 100% { opacity: .04; } 50% { opacity: .13; } }
+
+      @keyframes sofaBreathe { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+    state:
+      - value: 'on'
+        styles:
+          custom_fields:
+            sofa_graphic:
+              - --halo-play: running
+              - --led-play: running
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: sensor.washing_machine_appliance_state
+        state_not: Idle
+    card:
+      type: custom:button-card
+      entity: sensor.washing_machine_appliance_state
+      triggers_update:
+        - sensor.aeg_washing_machine_time_remaining_hh_mm
+      aspect_ratio: 1/1
+      show_name: false
+      show_state: false
+      show_icon: false
+      tap_action:
+        action: javascript
+        haptic: heavy
+        javascript: |
+          [[[
+            try {
+              const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+              if (ctx.state === 'suspended') ctx.resume();
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              o.frequency.value = 900;
+              g.gain.setValueAtTime(0.25, ctx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+              o.connect(g); g.connect(ctx.destination);
+              o.start(); o.stop(ctx.currentTime + 0.05);
+            } catch (e) {}
+            hass.callService('homeassistant', 'update_entity', { entity_id: entity.entity_id });
+            const ev = new Event('hass-more-info', { bubbles: true, composed: true });
+            ev.detail = { entityId: entity.entity_id };
+            (document.querySelector('home-assistant') || window).dispatchEvent(ev);
+          ]]]
+      hold_action:
+        action: more-info
+      custom_fields:
+        washer_graphic: |
+          [[[
+            const st = entity.state;
+            const t  = states['sensor.aeg_washing_machine_time_remaining_hh_mm'];
+            const tv = (t && t.state && !['unknown','unavailable','none',''].includes(t.state.toLowerCase()))
+                       ? t.state : '--:--';
+
+            const centre =
+              st === 'Unknown'
+                ? '<g class="glyph-warn">' +
+                  '<line x1="120" y1="86" x2="120" y2="116" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<circle cx="120" cy="132" r="3.5" fill="var(--wash-color)"></circle>' +
+                  '</g>'
+              : st === 'Paused'
+                ? '<g class="glyph-pause">' +
+                  '<line x1="106" y1="72" x2="106" y2="96" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<line x1="134" y1="72" x2="134" y2="96" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<text x="120" y="126" class="time-sm" fill="var(--wash-color)">' + tv + '</text>' +
+                  '</g>'
+              : st === 'Delayed Start'
+                ? '<g class="glyph-hourglass">' +
+                  '<g class="hg-spin">' +
+                  '<path d="M106 66 H134 L120 88 Z" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+                  '<path d="M106 110 H134 L120 88 Z" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+                  '<line x1="102" y1="66" x2="138" y2="66" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<line x1="102" y1="110" x2="138" y2="110" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '</g>' +
+                  '<text x="120" y="140" class="time-sm" fill="var(--wash-color)">' + tv + '</text>' +
+                  '</g>'
+              : '<text x="120" y="118" class="time-lg" fill="var(--wash-color)">' + tv + '</text>';
+
+            return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="washer-svg">' +
+              '<circle cx="120" cy="120" r="110" class="halo" fill="var(--wash-color)" opacity="var(--halo-op, 0)"></circle>' +
+              '<g class="drum">' +
+                '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--wash-color)" stroke-width="3.5"></circle>' +
+                '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--wash-color)" stroke-width="1.2" opacity="0.45"></circle>' +
+                '<circle cx="120" cy="120" r="72" fill="none" stroke="var(--wash-color)" stroke-width="3.5"></circle>' +
+                '<circle cx="120" cy="120" r="64" fill="none" stroke="var(--wash-color)" stroke-width="1.2" opacity="0.5"></circle>' +
+              '</g>' +
+              '<g class="tumble" opacity="var(--tumble-op, 0)">' +
+                '<g class="tumble-spin">' +
+                  '<path d="M120 44 A76 76 0 0 1 173 66" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+                  '<path d="M120 196 A76 76 0 0 1 67 174" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+                '</g>' +
+              '</g>' +
+              '<g class="water" opacity="var(--water-op, 0)">' +
+                '<path d="M74 142 q13 -11 26 0 t26 0 t26 0 t14 0" fill="none" stroke="var(--wash-color)" stroke-width="3" stroke-linecap="round" class="wv v1"></path>' +
+                '<path d="M80 158 q12 -10 24 0 t24 0 t24 0" fill="none" stroke="var(--wash-color)" stroke-width="3" stroke-linecap="round" opacity="0.7" class="wv v2"></path>' +
+                '<circle cx="97" cy="176" r="5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b1"></circle>' +
+                '<circle cx="120" cy="182" r="3.5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b2"></circle>' +
+                '<circle cx="141" cy="175" r="4.5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b3"></circle>' +
+              '</g>' +
+              centre +
+            '</svg>';
+          ]]]
+      styles:
+        card:
+          - padding: 0px
+          - background-color: transparent
+          - box-shadow: none
+          - border: none
+        grid:
+          - position: relative
+        custom_fields:
+          washer_graphic:
+            - position: absolute
+            - top: 50%
+            - left: 50%
+            - transform: translate(-50%, -50%)
+            - width: 110%
+            - height: 110%
+            - --card-background-color: '#000000'
+            - --wash-color: '#FFFFFF'
+      extra_styles: >
+        .washer-svg { width: 100%; height: 100%; display: block; }
+
+
+        .time-lg { font-family: var(--paper-font-body1_-_font-family,
+        sans-serif);
+                   font-size: 40px; font-weight: 500; text-anchor: middle;
+                   letter-spacing: 1px; }
+
+        .time-sm { font-family: var(--paper-font-body1_-_font-family,
+        sans-serif);
+                   font-size: 26px; font-weight: 500; text-anchor: middle;
+                   letter-spacing: 1px; }
+
+
+        .halo { transform-box: fill-box; transform-origin: center;
+                animation: washHalo 3s ease-in-out infinite;
+                animation-play-state: var(--halo-play, paused); }
+
+
+        .drum circle, .tumble path, .wv, .bub { transition: stroke .45s ease; }
+
+        .tumble { transition: opacity .4s ease; }
+
+        .water { transition: opacity .4s ease; }
+
+        .tumble-spin { transform-box: view-box; transform-origin: 120px 120px;
+                       animation: washSpin 3.5s linear infinite;
+                       animation-play-state: var(--spin-play, paused); }
+
+
+        .wv { transform-box: fill-box; animation: washSlosh 3.4s ease-in-out
+        infinite;
+              animation-play-state: var(--water-play, paused); }
+
+        .v1 { animation-delay: 0s; }
+
+        .v2 { animation-delay: .6s; }
+
+
+        .bub { transform-box: fill-box; transform-origin: center;
+               animation: washBubble 3.8s ease-in-out infinite;
+               animation-play-state: var(--water-play, paused); }
+
+        .b1 { animation-delay: 0s; }
+
+        .b2 { animation-delay: .9s; }
+
+        .b3 { animation-delay: 1.7s; }
+
+
+        .hg-spin { transform-box: fill-box; transform-origin: center;
+                   animation: washFlip 6s ease-in-out infinite; }
+
+
+        .glyph-warn { animation: washBlink 1.6s steps(2) infinite; }
+
+
+        @keyframes washHalo   { 0%, 100% { opacity: .04; } 50% { opacity: .15; }
+        }
+
+        @keyframes washSpin   { to { transform: rotate(360deg); } }
+
+        @keyframes washSlosh  { 0%, 100% { transform: translateX(0); }
+                                50% { transform: translateX(5px); } }
+
+        @keyframes washBubble { 0%, 100% { transform: translateY(0) scale(1);
+        opacity: .45; }
+                                50% { transform: translateY(-5px) scale(1.12); opacity: .85; } }
+
+        @keyframes washFlip   { 0%, 45% { transform: rotate(0deg); } 55%, 100% {
+        transform: rotate(180deg); } }
+
+        @keyframes washBlink  { 50% { opacity: .3; } }
+
+        @keyframes washPulse  { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
+      state:
+        - value: Running
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#00A1E4'
+                - --halo-play: running
+                - --halo-op: 0.1
+                - --spin-play: running
+                - --tumble-op: 1
+                - --water-op: 1
+                - --water-play: running
+                - animation: washPulse 2.4s ease-in-out infinite
+                - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.5))
+        - value: Paused
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#FF9F0A'
+                - --tumble-op: 0.3
+                - --water-op: 0.35
+                - filter: drop-shadow(0 0 8px rgba(255, 159, 10, 0.4))
+        - value: Ready To Start
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#34C759'
+                - --tumble-op: 0.35
+                - --water-op: 0.35
+                - filter: drop-shadow(0 0 8px rgba(52, 199, 89, 0.4))
+        - value: Idle
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#FFFFFF'
+                - --water-op: 0.25
+        - value: End Of Cycle
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#B06BFF'
+                - --halo-play: running
+                - --halo-op: 0.12
+                - --water-op: 0.4
+                - animation: washPulse 1.5s ease-in-out infinite
+                - filter: drop-shadow(0 0 12px rgba(176, 107, 255, 0.55))
+        - value: Delayed Start
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#26C6DA'
+                - --tumble-op: 0.25
+                - --water-op: 0.25
+                - filter: drop-shadow(0 0 8px rgba(38, 198, 218, 0.4))
+        - value: Unknown
+          styles:
+            custom_fields:
+              washer_graphic:
+                - --wash-color: '#FF3B30'
+                - filter: drop-shadow(0 0 10px rgba(255, 59, 48, 0.5))
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: sensor.dryer_appliance_state
+        state_not: Idle
+    card:
+      type: custom:button-card
+      entity: sensor.dryer_appliance_state
+      triggers_update:
+        - sensor.aeg_dryer_time_remaining_hh_mm
+      aspect_ratio: 1/1
+      show_name: false
+      show_state: false
+      show_icon: false
+      tap_action:
+        action: javascript
+        haptic: heavy
+        javascript: |
+          [[[
+            try {
+              const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+              if (ctx.state === 'suspended') ctx.resume();
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              o.frequency.value = 900;
+              g.gain.setValueAtTime(0.25, ctx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+              o.connect(g); g.connect(ctx.destination);
+              o.start(); o.stop(ctx.currentTime + 0.05);
+            } catch (e) {}
+            hass.callService('homeassistant', 'update_entity', { entity_id: entity.entity_id });
+            const ev = new Event('hass-more-info', { bubbles: true, composed: true });
+            ev.detail = { entityId: entity.entity_id };
+            (document.querySelector('home-assistant') || window).dispatchEvent(ev);
+          ]]]
+      hold_action:
+        action: more-info
+      custom_fields:
+        dryer_graphic: |
+          [[[
+            const st = entity.state;
+            const t  = states['sensor.aeg_dryer_time_remaining_hh_mm'];
+            const tv = (t && t.state && !['unknown','unavailable','none',''].includes(t.state.toLowerCase()))
+                       ? t.state : '--:--';
+
+            const centre =
+              st === 'Unknown'
+                ? '<g class="glyph-warn">' +
+                  '<line x1="120" y1="98" x2="120" y2="128" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<circle cx="120" cy="144" r="3.5" fill="var(--dry-color)"></circle>' +
+                  '</g>'
+              : st === 'Paused'
+                ? '<g class="glyph-pause">' +
+                  '<line x1="106" y1="92" x2="106" y2="116" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<line x1="134" y1="92" x2="134" y2="116" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<text x="120" y="150" class="time-sm" fill="var(--dry-color)">' + tv + '</text>' +
+                  '</g>'
+              : st === 'Delayed Start'
+                ? '<g class="glyph-hourglass">' +
+                  '<g class="hg-spin">' +
+                  '<path d="M106 90 H134 L120 112 Z" fill="none" stroke="var(--dry-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+                  '<path d="M106 134 H134 L120 112 Z" fill="none" stroke="var(--dry-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+                  '<line x1="102" y1="90" x2="138" y2="90" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '<line x1="102" y1="134" x2="138" y2="134" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+                  '</g>' +
+                  '<text x="120" y="166" class="time-sm" fill="var(--dry-color)">' + tv + '</text>' +
+                  '</g>'
+              : '<text x="120" y="146" class="time-lg" fill="var(--dry-color)">' + tv + '</text>';
+
+            return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="dryer-svg">' +
+              '<circle cx="120" cy="120" r="110" class="halo" fill="var(--dry-color)" opacity="var(--halo-op, 0)"></circle>' +
+              '<g class="drum">' +
+                '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--dry-color)" stroke-width="3.5"></circle>' +
+                '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--dry-color)" stroke-width="1.2" opacity="0.45"></circle>' +
+                '<circle cx="120" cy="120" r="72" fill="none" stroke="var(--dry-color)" stroke-width="3.5"></circle>' +
+                '<circle cx="120" cy="120" r="64" fill="none" stroke="var(--dry-color)" stroke-width="1.2" opacity="0.5"></circle>' +
+              '</g>' +
+              '<g class="tumble" opacity="var(--tumble-op, 0)">' +
+                '<g class="tumble-spin">' +
+                  '<path d="M120 44 A76 76 0 0 1 173 66" fill="none" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+                  '<path d="M120 196 A76 76 0 0 1 67 174" fill="none" stroke="var(--dry-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+                '</g>' +
+              '</g>' +
+              '<g class="heat" opacity="var(--heat-op, 0)">' +
+                '<path d="M103 96 q-7 -8 0 -16 t0 -16" fill="none" stroke="var(--dry-color)" stroke-width="3" stroke-linecap="round" class="hw h1"></path>' +
+                '<path d="M120 96 q-7 -8 0 -16 t0 -16" fill="none" stroke="var(--dry-color)" stroke-width="3" stroke-linecap="round" class="hw h2"></path>' +
+                '<path d="M137 96 q-7 -8 0 -16 t0 -16" fill="none" stroke="var(--dry-color)" stroke-width="3" stroke-linecap="round" class="hw h3"></path>' +
+              '</g>' +
+              centre +
+            '</svg>';
+          ]]]
+      styles:
+        card:
+          - padding: 0px
+          - background-color: transparent
+          - box-shadow: none
+          - border: none
+        grid:
+          - position: relative
+        custom_fields:
+          dryer_graphic:
+            - position: absolute
+            - top: 50%
+            - left: 50%
+            - transform: translate(-50%, -50%)
+            - width: 110%
+            - height: 110%
+            - --card-background-color: '#000000'
+            - --dry-color: '#FFFFFF'
+      extra_styles: >
+        .dryer-svg { width: 100%; height: 100%; display: block; }
+
+
+        .time-lg { font-family: var(--paper-font-body1_-_font-family,
+        sans-serif);
+                   font-size: 40px; font-weight: 500; text-anchor: middle;
+                   letter-spacing: 1px; }
+
+        .time-sm { font-family: var(--paper-font-body1_-_font-family,
+        sans-serif);
+                   font-size: 26px; font-weight: 500; text-anchor: middle;
+                   letter-spacing: 1px; }
+
+
+        .halo { transform-box: fill-box; transform-origin: center;
+                animation: dryHalo 3s ease-in-out infinite;
+                animation-play-state: var(--halo-play, paused); }
+
+
+        .drum circle, .tumble path, .hw { transition: stroke .45s ease; }
+
+        .tumble { transition: opacity .4s ease; }
+
+        .heat { transition: opacity .4s ease; }
+
+        .tumble-spin { transform-box: view-box; transform-origin: 120px 120px;
+                       animation: drySpin 3.5s linear infinite;
+                       animation-play-state: var(--spin-play, paused); }
+
+
+        .hw { transform-box: fill-box; animation: dryRise 3s ease-in-out
+        infinite;
+              animation-play-state: var(--heat-play, paused); }
+
+        .h1 { animation-delay: 0s; }
+
+        .h2 { animation-delay: .4s; }
+
+        .h3 { animation-delay: .8s; }
+
+
+        .hg-spin { transform-box: fill-box; transform-origin: center;
+                   animation: dryFlip 6s ease-in-out infinite; }
+
+
+        .glyph-warn { animation: dryBlink 1.6s steps(2) infinite; }
+
+
+        @keyframes dryHalo  { 0%, 100% { opacity: .04; } 50% { opacity: .15; } }
+
+        @keyframes drySpin  { to { transform: rotate(360deg); } }
+
+        @keyframes dryRise  { 0%, 100% { transform: translateY(0); opacity: .5;
+        }
+                              50% { transform: translateY(-4px); opacity: 1; } }
+
+        @keyframes dryFlip  { 0%, 45% { transform: rotate(0deg); } 55%, 100% {
+        transform: rotate(180deg); } }
+
+        @keyframes dryBlink { 50% { opacity: .3; } }
+
+        @keyframes dryPulse { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
+      state:
+        - value: Running
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#34C759'
+                - --halo-play: running
+                - --halo-op: 0.1
+                - --spin-play: running
+                - --tumble-op: 1
+                - --heat-op: 1
+                - --heat-play: running
+                - animation: dryPulse 2.4s ease-in-out infinite
+                - filter: drop-shadow(0 0 10px rgba(52, 199, 89, 0.5))
+        - value: Paused
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#FF9F0A'
+                - --tumble-op: 0.3
+                - --heat-op: 0.35
+                - filter: drop-shadow(0 0 8px rgba(255, 159, 10, 0.4))
+        - value: Ready To Start
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#00A1E4'
+                - --tumble-op: 0.35
+                - --heat-op: 0.35
+                - filter: drop-shadow(0 0 8px rgba(0, 161, 228, 0.4))
+        - value: Idle
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#FFFFFF'
+                - --heat-op: 0.25
+        - value: End Of Cycle
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#B06BFF'
+                - --halo-play: running
+                - --halo-op: 0.12
+                - --heat-op: 0.4
+                - animation: dryPulse 1.5s ease-in-out infinite
+                - filter: drop-shadow(0 0 12px rgba(176, 107, 255, 0.55))
+        - value: Delayed Start
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#26C6DA'
+                - --tumble-op: 0.25
+                - --heat-op: 0.25
+                - filter: drop-shadow(0 0 8px rgba(38, 198, 218, 0.4))
+        - value: Unknown
+          styles:
+            custom_fields:
+              dryer_graphic:
+                - --dry-color: '#FF3B30'
+                - filter: drop-shadow(0 0 10px rgba(255, 59, 48, 0.5))
