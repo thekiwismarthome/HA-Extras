@@ -1,0 +1,105 @@
+type: custom:button-card
+show_icon: false
+show_name: false
+show_label: true
+triggers_update:
+  - sensor.news_headlines
+  - sensor.metservice_warnings
+tap_action:
+  action: javascript
+  javascript: |
+    [[[
+      const dash = window.location.pathname.split('/')[1] || 'lovelace';
+      history.pushState(null, '', `/${dash}/news`);
+      window.dispatchEvent(new Event('location-changed'));
+    ]]]
+label: |
+  [[[
+    // Feeds to interleave: RNZ news (white) + MetService warnings (amber, flagged)
+    const feeds = [
+      { id: 'sensor.news_headlines',       color: '#FFFFFF', prefix: '' },
+      { id: 'sensor.metservice_warnings',  color: '#FF9F0A', prefix: '⚠ ' }  // ⚠
+    ];
+    // Optional: keep MetService warnings to Auckland only. Set to null to show
+    // all NZ regions; or add more terms e.g. /auckland|northland|coromandel/i
+    const warnFilter = null; // e.g. /auckland/i
+    const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    let items = [];
+    for (const f of feeds) {
+      const s = hass.states[f.id];
+      if (!s || !Array.isArray(s.attributes.entries)) continue;
+      const isWarn = f.id === 'sensor.metservice_warnings';
+      for (const e of s.attributes.entries) {
+        if (!e || !e.title) continue;
+        if (isWarn && warnFilter && !warnFilter.test(e.title)) continue;
+        items.push(`<span class="item" style="color:${f.color}">${f.prefix}${esc(e.title)}</span>`);
+      }
+    }
+    if (!items.length) items.push('<span class="item">No headlines</span>');
+
+    const sep  = '<span class="sep">•</span>';
+    const half = items.join(sep) + sep;           // one full pass, ending in a sep
+    // Speed: scale duration with content so px/sec stays constant (~40px/s).
+    const chars = items.reduce((n, i) => n + i.length, 0);
+    const dur   = Math.max(20, Math.round(chars * 0.18));
+    // Two identical halves → translateX(-50%) loops seamlessly.
+    return `<div class="ticker"><div class="marquee" style="animation-duration:${dur}s">${half}${half}</div></div>`;
+  ]]]
+styles:
+  card:
+    - background: transparent
+    - box-shadow: none
+    - border: none
+    - border-radius: 0
+    - padding: 0
+    - height: 46px
+  grid:
+    - grid-template-areas: '"l"'
+    - grid-template-columns: 1fr
+    - grid-template-rows: 1fr
+  label:
+    - justify-self: stretch
+    - align-self: center
+    - width: 100%
+    - margin: 0
+    - padding: 0
+extra_styles: >
+  #label { padding: 0 !important; margin: 0 !important; width: 100%; }
+
+  .ticker {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: Antonio, sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    /* fade the edges so headlines don't hard-cut at the sides */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+
+  .marquee {
+    display: inline-block;
+    white-space: nowrap;
+    animation-name: kiwi-news-marquee;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+
+  .ticker:hover .marquee { animation-play-state: paused; }  /* hover/touch-hold
+  to read */
+
+  .item { color: #FFFFFF; }
+
+  .sep  { color: #6B6E70; margin: 0 18px; }
+
+  @keyframes kiwi-news-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+grid_options:
+  rows: auto
+  columns: full
