@@ -1,0 +1,12 @@
+# MetService Warnings — feedparser. One sensor per file for entities/sensors/ (!include_dir_list).
+platform: feedparser
+name: MetService Warnings
+feed_url: "https://alerts.metservice.com/cap/rss"
+date_format: "%a, %d %b %Y %H:%M:%S %z"   # keep year + tz so the card parses exact ages
+show_topn: 8
+inclusions:
+  - title
+  - link
+  - published
+scan_interval:
+  minutes: 15

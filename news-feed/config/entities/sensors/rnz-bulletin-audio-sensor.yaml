@@ -1,0 +1,20 @@
+# RNZ latest news bulletin (audio) — REST scrape of the RNZ Pacific page.
+# One sensor per file for entities/sensors/ (!include_dir_list).
+#
+# The page embeds the current bulletin in a `latest-bulletin='{...}'` attribute;
+# we pull its `audioSrc` .mp3 out with regex. State = the current MP3 URL, so a
+# play button bound to this sensor always plays the latest bulletin.
+# The URL changes each release; scan_interval re-scrapes every 15 min.
+
+platform: rest
+name: RNZ Latest Bulletin
+resource: "https://www.rnz.co.nz/news/pacific"
+method: GET
+scan_interval: 900
+timeout: 20
+headers:
+  User-Agent: "Mozilla/5.0 (Home Assistant; RNZ bulletin fetch)"
+# State = current bulletin MP3 URL (well under the 255-char state limit).
+# Single line so no folded-scalar whitespace sneaks into the URL.
+value_template: >-
+  {{ (value | regex_findall('"audioSrc":"(https[^"]+?[.]mp3)"') or ['unknown']) | first }}

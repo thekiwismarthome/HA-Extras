@@ -1,0 +1,70 @@
+# RNZ News bulletin — play button (Kiwi style)
+# Plays the latest bulletin MP3 (from sensor.rnz_latest_bulletin, which re-scrapes
+# the URL every 15 min) on the tablet's VACA media_player.
+#
+# >>> SET YOUR PLAYER: replace  media_player.REPLACE_WITH_VACA_PLAYER  in ALL THREE
+#     places below (entity, tap target, hold target). Find it in Developer Tools ->
+#     States, filter media_player — it's the one from the VACA integration for this
+#     device (NOT the Music Assistant "MA" one).
+#
+# Tap  = play the latest bulletin.   Hold = stop.
+# Icon glows blue while that player is playing.
+
+type: custom:button-card
+entity: media_player.REPLACE_WITH_VACA_PLAYER
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+
+tap_action:
+  action: call-service
+  service: media_player.play_media
+  target:
+    entity_id: media_player.REPLACE_WITH_VACA_PLAYER
+  data:
+    media_content_id: |
+      [[[ return states['sensor.rnz_latest_bulletin'].state; ]]]
+    media_content_type: music
+hold_action:
+  action: call-service
+  service: media_player.media_stop
+  target:
+    entity_id: media_player.REPLACE_WITH_VACA_PLAYER
+
+# Play graphic, defined once. currentColor lets each state recolor it.
+custom_fields:
+  play_graphic: |
+    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%">
+      <circle cx="50" cy="50" r="34"/>
+      <path d="M43 37 L65 50 L43 63 Z"/>
+    </svg>
+
+styles:
+  card:
+    - padding: 0px
+    - background-color: "#000000"
+  grid:
+    - position: relative
+  custom_fields:
+    play_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 85%
+      - height: 85%
+      - color: "#6B6E70"          # idle / stopped — dim grey
+
+state:
+  - value: playing
+    styles:
+      custom_fields:
+        play_graphic:
+          - color: "#00A1E4"       # running — blue
+          - filter: drop-shadow(0 0 8px rgba(0, 161, 228, 0.55))
+  - value: paused
+    styles:
+      custom_fields:
+        play_graphic:
+          - color: "#FF9F0A"       # paused — amber
