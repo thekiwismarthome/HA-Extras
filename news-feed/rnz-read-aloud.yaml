@@ -1,0 +1,30 @@
+# RNZ read-aloud — config for the pyscript version.
+# ---------------------------------------------------------------------------
+# Top-level domain blocks — merge into configuration.yaml (or your package file).
+# If a key already exists, add the entry under it instead of repeating the key.
+#
+# Prereqs:
+#   • pyscript installed (HACS) — see the `pyscript:` block below
+#   • Copy rnz_read_aloud.py to  <config>/pyscript/rnz_read_aloud.py
+#   • Home Assistant Cloud (Nabu Casa) → tts.home_assistant_cloud
+#   • The read-aloud button passes your VACA media_player as `player`
+#
+# The command_line sensor + read/stop scripts from the earlier version are NOT
+# needed with pyscript — the pyscript.rnz_read_aloud service does it all, and the
+# button calls media_player.media_stop directly to stop.
+# ---------------------------------------------------------------------------
+
+# pyscript must allow stdlib imports (urllib/re/json/html) used by the service.
+# EASIEST: do this in the UI instead of YAML — install pyscript in HACS, then
+# Settings > Devices & Services > + Add Integration > "Pyscript Python scripting",
+# and in its Configure options tick "Allow all imports" + "Hass is global".
+# If you prefer YAML, add this block to configuration.yaml (but not both — pyscript
+# rejects being configured via UI and YAML at once):
+pyscript:
+  allow_all_imports: true
+  hass_is_global: true
+
+# NOTE: With the per-row speaker buttons, the news card passes the story URL
+# straight to pyscript.rnz_read_aloud, so the input_text.rnz_selected_url helper
+# is NO LONGER required. Only add it if you also use the standalone read-aloud
+# button (rnz-read-aloud-button-card.yaml), which reads the currently-shown story.
