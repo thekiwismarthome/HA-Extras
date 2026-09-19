@@ -1,0 +1,69 @@
+type: custom:button-card
+entity: sun.sun
+tap_action:
+  action: javascript
+  javascript: |
+    [[[
+      const dash = window.location.pathname.split('/')[1] || 'lovelace';
+      history.pushState(null, '', `/${dash}/shares`);
+      window.dispatchEvent(new Event('location-changed'));
+    ]]]
+triggers_update: all
+show_name: false
+show_icon: false
+show_state: false
+custom_fields:
+  ticker: |
+    [[[
+      return (function() {
+        var ids = Object.keys(states)
+          .filter(function(id){ return id.indexOf('sensor.yahoofinance_') === 0; })
+          .sort();
+        var out = ids.map(function(id) {
+          var s = states[id]; if (!s) return '';
+          var a = s.attributes;
+          var isFx = id.slice(-2) === '_x';
+          var sym = (a.symbol || id).replace('=X','');
+          var val = isFx
+            ? Number(s.state).toFixed(4)
+            : '$' + Number(s.state).toFixed(2);
+          var p = Number(a.regularMarketChangePercent);
+          var up = p >= 0;
+          var color = up ? '#4ade80' : '#f87171';
+          var arrow = up ? '▲' : '▼';
+          return '<span class="tk"><b>' + sym + '</b> ' + val + ' '
+            + '<span style="color:' + color + '">' + arrow + ' '
+            + (p > 0 ? '+' : '') + p.toFixed(2) + '%</span></span>';
+        }).join('');
+        return out + out;
+      })();
+    ]]]
+styles:
+  card:
+    - font-family: Antonio, sans-serif
+    - padding: 0
+    - background: '#000'
+    - border-radius: 10px
+    - overflow: hidden
+  grid:
+    - grid-template-areas: '"ticker"'
+  custom_fields:
+    ticker:
+      - white-space: nowrap
+      - display: inline-block
+      - padding: 9px 0
+      - animation: ticker-scroll 45s linear infinite
+extra_styles: |
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .tk {
+    margin: 0 20px;
+    font-size: 15px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+grid_options:
+  rows: auto
+  columns: full
