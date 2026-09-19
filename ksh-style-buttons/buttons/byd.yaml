@@ -1,0 +1,162 @@
+# KSH Style Button — BYD (EV / navigation)
+# =============================================================================
+#  Behaviour: ksh_tap_beep template -> navigates to /<dashboard>/byd.
+#  Requires the ksh_tap_beep template to be registered (see templates/).
+#
+#  Look: JS-built line-art car with a SOC gauge ring, live battery % + range,
+#  colour driven by charge level, and a charging bolt + spin ring while plugged
+#  in. Reads the bydauto (HACS "BYD Auto") integration sensors.
+#
+#  >>> Set these three to YOUR bydauto entity_ids (Developer Tools -> States,
+#      filter "byd"). The tile degrades gracefully if any are missing. <<<
+# =============================================================================
+type: custom:button-card
+template: ksh_tap_beep
+entity: sensor.byd_state_of_charge          # SOC % — also used for hold/more-info
+variables:
+  nav: byd                                  # tap -> /<dashboard>/byd
+  soc_entity: sensor.byd_state_of_charge    # battery state of charge (0-100 %)
+  charging_entity: sensor.byd_charging_state # "charging"/"on"/... while plugged in
+  range_entity: sensor.byd_range            # remaining range (km) — optional
+hold_action:
+  action: none
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+custom_fields:
+  byd_graphic: |
+    [[[
+      const v = variables || {};
+      const socRaw = v.soc_entity ? states[v.soc_entity] : null;
+      const soc = socRaw ? parseFloat(socRaw.state) : NaN;
+      const hasSoc = isFinite(soc);
+
+      const chRaw = v.charging_entity ? states[v.charging_entity] : null;
+      const chSt = (chRaw ? chRaw.state : '').toString().toLowerCase();
+      const charging = ['charging','on','true','plugged_in_charging','fast_charging','ac_charging','dc_charging'].includes(chSt);
+
+      const rngRaw = v.range_entity ? states[v.range_entity] : null;
+      const rangeKm = rngRaw ? parseFloat(rngRaw.state) : NaN;
+
+      const low = hasSoc && soc <= 15 && !charging;
+
+      let col;
+      if (charging)        col = '#00A1E4';   // cool / charging
+      else if (!hasSoc)    col = '#6B6E70';   // unknown / dim grey
+      else if (soc <= 20)  col = '#FF3B30';   // low / alert
+      else if (soc <= 50)  col = '#FF9F0A';   // warning
+      else                 col = '#34C759';   // healthy
+
+      const chargePlay = charging ? 'running' : 'paused';
+      const glow = charging ? 'drop-shadow(0 0 13px rgba(0,161,228,0.55))'
+                 : (low ? 'drop-shadow(0 0 10px rgba(255,59,48,0.5))'
+                        : (hasSoc && soc > 50 ? 'drop-shadow(0 0 8px rgba(52,199,89,0.4))' : 'none'));
+
+      // SOC gauge arc on the r=94 ring, from the top, clockwise
+      const R = 94, C = 2 * Math.PI * R;
+      const frac = hasSoc ? Math.max(0, Math.min(100, soc)) / 100 : 0;
+      const dash = (C * frac).toFixed(1) + ' ' + (C - C * frac).toFixed(1);
+
+      const socTxt = hasSoc ? Math.round(soc) : '--';
+      const subTxt = charging ? 'CHARGING'
+                   : (isFinite(rangeKm) ? (Math.round(rangeKm) + ' KM') : 'BYD');
+
+      let out = '';
+      out += '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="byd-svg" '
+           + 'style="--byd-color:' + col + ';--charge-play:' + chargePlay + ';filter:' + glow + '">';
+
+      // faint outer halo
+      out += '<circle cx="120" cy="120" r="110" fill="var(--byd-color)" opacity="'
+           + (charging ? '0.12' : (low ? '0.10' : '0.06')) + '"></circle>';
+
+      // ring frame: faint base + thin inner
+      out += '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--byd-color)" stroke-width="3.4" opacity="0.18"></circle>';
+      out += '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--byd-color)" stroke-width="0.9" opacity="0.3"></circle>';
+
+      // SOC gauge progress arc (only when we have a reading)
+      if (hasSoc) {
+        out += '<circle class="byd-gauge" cx="120" cy="120" r="94" fill="none" stroke="var(--byd-color)" '
+             + 'stroke-width="3.4" stroke-linecap="round" '
+             + 'stroke-dasharray="' + dash + '" transform="rotate(-90 120 120)"></circle>';
+      }
+
+      // charging spin ring (dashed) while plugged in
+      if (charging) {
+        out += '<circle class="byd-charge-ring" cx="120" cy="120" r="78" fill="none" stroke="var(--byd-color)" '
+             + 'stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 14" opacity="0.55"></circle>';
+      }
+
+      // ---- car side profile (line-art, hollow) ----
+      out += '<g class="byd-car">';
+      out += '<path d="M52 128 L52 118 Q53 111 62 109 L86 103 L100 84 Q104 79 112 79 '
+           + 'L146 79 Q156 79 162 88 L176 106 L186 109 Q194 111 194 120 L194 128 Z" '
+           + 'fill="var(--card-background-color,#000)" stroke="var(--byd-color)" stroke-width="3.5" stroke-linejoin="round"></path>';
+      // pillar + window hints
+      out += '<path d="M124 80 L124 103" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.5"></path>';
+      out += '<path d="M104 101 L114 86 Q116 83 121 83 L121 101 Z" fill="none" stroke="var(--byd-color)" stroke-width="0.9" opacity="0.3"></path>';
+      out += '<path d="M127 83 L143 83 Q150 83 155 90 L162 100 L127 101 Z" fill="none" stroke="var(--byd-color)" stroke-width="0.9" opacity="0.3"></path>';
+      // rocker line
+      out += '<path d="M74 128 L172 128" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.35"></path>';
+      // wheels
+      out += '<circle cx="86" cy="130" r="16" fill="var(--card-background-color,#000)" stroke="var(--byd-color)" stroke-width="3.4"></circle>';
+      out += '<circle cx="86" cy="130" r="6" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.6"></circle>';
+      out += '<circle cx="160" cy="130" r="16" fill="var(--card-background-color,#000)" stroke="var(--byd-color)" stroke-width="3.4"></circle>';
+      out += '<circle cx="160" cy="130" r="6" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.6"></circle>';
+      out += '</g>';
+
+      // charging bolt badge at the front, while plugged in
+      if (charging) {
+        out += '<path class="byd-bolt" d="M180 96 L168 116 L177 116 L172 132 L190 108 L181 108 Z" '
+             + 'fill="var(--byd-color)" stroke="var(--card-background-color,#000)" stroke-width="1.4" stroke-linejoin="round"></path>';
+      }
+
+      // ---- battery % + range/charging readout ----
+      out += '<text class="byd-num" x="120" y="186" font-size="42">' + socTxt
+           + '<tspan class="byd-pct" font-size="20" dx="1" dy="-14">%</tspan></text>';
+      out += '<text class="byd-sub" x="120" y="208" font-size="15">' + subTxt + '</text>';
+
+      out += '</svg>';
+      return out;
+    ]]]
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    byd_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 105%
+      - height: 105%
+      - --card-background-color: '#000000'
+extra_styles: |
+  .byd-svg { width: 100%; height: 100%; display: block; }
+
+  .byd-num, .byd-sub {
+    font-family: Antonio, 'Roboto Condensed', sans-serif;
+    fill: var(--byd-color);
+    text-anchor: middle;
+  }
+  .byd-num { font-weight: 700; }
+  .byd-pct { font-weight: 600; }
+  .byd-sub { font-weight: 600; opacity: 0.72; letter-spacing: 1px; }
+
+  .byd-charge-ring {
+    transform-box: view-box; transform-origin: 120px 120px;
+    animation: bydSpin 6s linear infinite;
+    animation-play-state: var(--charge-play, paused);
+  }
+  .byd-bolt {
+    animation: bydPulse 1.6s ease-in-out infinite;
+    animation-play-state: var(--charge-play, paused);
+  }
+
+  @keyframes bydSpin  { to { transform: rotate(360deg); } }
+  @keyframes bydPulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
