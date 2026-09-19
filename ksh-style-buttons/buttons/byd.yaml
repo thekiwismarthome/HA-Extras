@@ -1,23 +1,43 @@
-# KSH Style Button — BYD (EV / navigation)
+# KSH Style Button — BYD (EV)
 # =============================================================================
-#  Behaviour: ksh_tap_beep template -> navigates to /<dashboard>/byd.
-#  Requires the ksh_tap_beep template to be registered (see templates/).
+#  Behaviour: inline tap -> click-beep + navigate to /<dashboard>/byd.
+#  (Self-contained — does NOT need the ksh_tap_beep template registered.
+#   Built like alarm/washer/dryer: inline tap_action + JS-generated SVG.)
 #
 #  Look: JS-built line-art car with a SOC gauge ring, live battery % + range,
 #  colour driven by charge level, and a charging bolt + spin ring while plugged
 #  in. Reads the bydauto (HACS "BYD Auto") integration sensors.
 #
-#  >>> Set these three to YOUR bydauto entity_ids (Developer Tools -> States,
-#      filter "byd"). The tile degrades gracefully if any are missing. <<<
+#  >>> Entities are set to a BYD Sealion 7. Change the three entity_ids in the
+#      `variables:` block below to match your own car (Developer Tools ->
+#      States, filter "byd"). The tile degrades gracefully if any are missing.
 # =============================================================================
 type: custom:button-card
-template: ksh_tap_beep
-entity: sensor.byd_state_of_charge          # SOC % — also used for hold/more-info
+entity: sensor.byd_sealion_7_charge_state   # SOC % — also used for hold/more-info
 variables:
-  nav: byd                                  # tap -> /<dashboard>/byd
-  soc_entity: sensor.byd_state_of_charge    # battery state of charge (0-100 %)
-  charging_entity: sensor.byd_charging_state # "charging"/"on"/... while plugged in
-  range_entity: sensor.byd_range            # remaining range (km) — optional
+  soc_entity: sensor.byd_sealion_7_charge_state    # battery state of charge (0-100 %)
+  charging_entity: sensor.byd_sealion_7_charging_state  # charging/idle while plugged in
+  range_entity: sensor.byd_sealion_7_range_v2      # remaining range (km) — optional
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      const dashboard = window.location.pathname.split('/')[1] || 'lovelace';
+      history.pushState(null, '', '/' + dashboard + '/byd');
+      window.dispatchEvent(new Event('location-changed'));
+    ]]]
 hold_action:
   action: none
 aspect_ratio: 1/1
@@ -28,15 +48,20 @@ custom_fields:
   byd_graphic: |
     [[[
       const v = variables || {};
-      const socRaw = v.soc_entity ? states[v.soc_entity] : null;
+      // entity_ids (fall back to Sealion 7 defaults if variables not injected)
+      const socEnt = (v && v.soc_entity) || 'sensor.byd_sealion_7_charge_state';
+      const chgEnt = (v && v.charging_entity) || 'sensor.byd_sealion_7_charging_state';
+      const rngEnt = (v && v.range_entity) || 'sensor.byd_sealion_7_range_v2';
+
+      const socRaw = states[socEnt];
       const soc = socRaw ? parseFloat(socRaw.state) : NaN;
       const hasSoc = isFinite(soc);
 
-      const chRaw = v.charging_entity ? states[v.charging_entity] : null;
+      const chRaw = states[chgEnt];
       const chSt = (chRaw ? chRaw.state : '').toString().toLowerCase();
       const charging = ['charging','on','true','plugged_in_charging','fast_charging','ac_charging','dc_charging'].includes(chSt);
 
-      const rngRaw = v.range_entity ? states[v.range_entity] : null;
+      const rngRaw = states[rngEnt];
       const rangeKm = rngRaw ? parseFloat(rngRaw.state) : NaN;
 
       const low = hasSoc && soc <= 15 && !charging;
