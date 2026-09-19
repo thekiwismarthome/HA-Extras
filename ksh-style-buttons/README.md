@@ -21,7 +21,7 @@ ksh-style-buttons/
 │  └─ ksh-style-buttons.yaml      ← reusable button_card_templates (ksh_tap_beep behaviour)
 ├─ buttons/                       ← one self‑contained tile per file
 │  ├─ home.yaml     news.yaml     shares.yaml     ← navigation tiles (use the template)
-│  ├─ byd.yaml                                    ← EV tile (inline): SOC gauge + live %, nav to /byd
+│  ├─ byd.yaml                                    ← EV tile (static SVG): car, colour by battery %
 │  ├─ light.yaml    climate.yaml  vacuum.yaml     ← entity tiles
 │  ├─ ambilight.yaml tv.yaml      music.yaml
 │  ├─ alarm.yaml    sofa.yaml
@@ -208,7 +208,7 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **home** | `nav: home` | template‑driven navigation; house glyph + glow |
 | **news** | `nav: news` | line‑art globe filling the box + Antonio wordmark; gradient halo |
 | **shares** | `nav: shares` | random up/down/up bar chart; arrow tracing the tops at matching weight |
-| **byd** | inline nav (`/byd`) | EV tile off the **bydauto** integration: JS‑built car with a SOC gauge ring, colour by charge (charging blue · healthy green · low red · unknown grey), animated bolt + spin ring while plugged in, live `%` + range readout. Self‑contained (no template needed) |
+| **byd** | more‑info | EV tile off the **bydauto** integration. **Static SVG** (no JS templates) — line‑art car recoloured by battery % via `state:` blocks (≥60 green · 30–59 amber · <30 red · non‑numeric grey), each band with a matching glow. Live %/gauge/charging animation is a later add‑on once JS templates are sorted |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |
