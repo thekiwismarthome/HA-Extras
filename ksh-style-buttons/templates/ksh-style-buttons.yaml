@@ -1,0 +1,77 @@
+# =============================================================================
+#  KSH Style Buttons — reusable button_card_templates
+# =============================================================================
+#  Register these once at the ROOT of a dashboard (the same level as `views:`),
+#  then any tile can pull the behaviour in with `template: ksh_tap_beep`.
+#
+#  YAML-mode dashboard:
+#     button_card_templates: !include ksh-style-buttons/templates/ksh-style-buttons.yaml
+#     views: ...
+#
+#  Storage (UI) dashboard: open "Edit dashboard → Raw configuration editor"
+#  and paste the `button_card_templates:` block below at the top.
+# =============================================================================
+
+button_card_templates:
+
+  # ---------------------------------------------------------------------------
+  #  ksh_tap_beep — the behaviour layer for every KSH tile.
+  #  Plays a 900 Hz click + heavy haptic, then chooses its action from the
+  #  card's `variables`:
+  #
+  #    variables:
+  #      nav: shares                 # navigate to /<dashboard>/shares
+  #      tap: climate                # state-aware climate on/off (needs entity)
+  #      tap: vacuum                 # start / pause / locate     (needs entity)
+  #      effect: rainbow             # light turn_on with effect, else toggle
+  #      service: media_player.toggle# call any service on entity
+  #      data: { source: Netflix }   #   ...with optional service data
+  #      # (nothing)                 # default: toggle the entity's own domain
+  #
+  #  Hold = more-info. Nav tiles set `hold_action: { action: none }` on the card.
+  #  IMPORTANT: don't put a `tap_action` on a card that uses this template —
+  #  a card-level tap_action overrides the template and you lose the beep.
+  # ---------------------------------------------------------------------------
+  ksh_tap_beep:
+    hold_action:
+      action: more-info
+    tap_action:
+      action: javascript
+      haptic: heavy
+      javascript: |
+        [[[
+          // define the click beep ONCE, then play it
+          (window.__beep || (window.__beep = function () {
+            try {
+              const c = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+              if (c.state === 'suspended') c.resume();
+              const o = c.createOscillator(), g = c.createGain();
+              o.frequency.value = 900;
+              g.gain.setValueAtTime(1, c.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.05);
+              o.connect(g); g.connect(c.destination);
+              o.start(); o.stop(c.currentTime + 0.05);
+            } catch (e) {}
+          }))();
+
+          // choose the action from the card's variables
+          const v = variables || {};
+          if (v.nav) {                                   // navigate to a view on this dashboard
+            const dash = window.location.pathname.split('/')[1] || 'lovelace';
+            history.pushState(null, '', '/' + dash + '/' + v.nav);
+            window.dispatchEvent(new Event('location-changed'));
+          } else if (v.tap === 'climate') {              // state-aware on/off
+            hass.callService('climate', entity.state === 'off' ? 'turn_on' : 'turn_off', { entity_id: entity.entity_id });
+          } else if (v.tap === 'vacuum') {               // start / pause / locate
+            const s = entity.state, svc = (s === 'cleaning' || s === 'returning') ? 'pause' : (s === 'error' ? 'locate' : 'start');
+            hass.callService('vacuum', svc, { entity_id: entity.entity_id });
+          } else if (v.effect) {                         // light: turn on WITH an effect, toggle off
+            if (entity.state === 'on') hass.callService('light', 'turn_off', { entity_id: entity.entity_id });
+            else hass.callService('light', 'turn_on', { entity_id: entity.entity_id, effect: v.effect });
+          } else if (v.service) {                         // any "domain.service" (+ optional data)
+            const p = v.service.split('.');
+            hass.callService(p[0], p[1], Object.assign({ entity_id: entity.entity_id }, v.data || {}));
+          } else {                                        // default: toggle the entity's own domain
+            hass.callService(entity.entity_id.split('.')[0], 'toggle', { entity_id: entity.entity_id });
+          }
+        ]]]

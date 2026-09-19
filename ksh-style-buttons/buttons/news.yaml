@@ -1,0 +1,63 @@
+# KSH Style Button — News (navigation)
+# Behaviour: ksh_tap_beep template → navigates to /<dashboard>/news.
+# Line-art globe + "NEWS" wordmark (Antonio). Deep-blue icon, light-red halo.
+# Requires the ksh_tap_beep template to be registered (see templates/).
+type: custom:button-card
+template: ksh_tap_beep
+variables:
+  nav: news
+hold_action:
+  action: none
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+custom_fields:
+  news_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="news-svg">
+      <defs>
+        <radialGradient id="newsHalo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="var(--halo-color)" stop-opacity="1"></stop>
+          <stop offset="55%"  stop-color="var(--halo-color)" stop-opacity="0.9"></stop>
+          <stop offset="82%"  stop-color="var(--halo-color)" stop-opacity="0.4"></stop>
+          <stop offset="100%" stop-color="var(--halo-color)" stop-opacity="0"></stop>
+        </radialGradient>
+        <clipPath id="globeClip"><circle cx="120" cy="120" r="78"></circle></clipPath>
+      </defs>
+      <circle cx="120" cy="120" r="122" fill="url(#newsHalo)" opacity="var(--halo-op, 0.2)"></circle>
+      <circle cx="120" cy="120" r="78" fill="none" stroke="var(--news-color)" stroke-width="3.5"></circle>
+      <circle cx="120" cy="120" r="71" fill="none" stroke="var(--news-color)" stroke-width="0.8" opacity="0.25"></circle>
+      <g clip-path="url(#globeClip)" fill="none" stroke="var(--news-color)" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round">
+        <line x1="120" y1="42" x2="120" y2="198"></line>
+        <ellipse cx="120" cy="120" rx="33" ry="78"></ellipse>
+        <ellipse cx="120" cy="120" rx="61" ry="78"></ellipse>
+        <line x1="42" y1="120" x2="198" y2="120"></line>
+        <ellipse cx="120" cy="120" rx="78" ry="31"></ellipse>
+        <ellipse cx="120" cy="120" rx="78" ry="59"></ellipse>
+      </g>
+      <text x="120" y="133" font-family="Antonio, system-ui, Arial, sans-serif" font-size="37"
+            font-weight="700" fill="var(--news-color)" text-anchor="middle" letter-spacing="2">NEWS</text>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - overflow: visible
+    - --news-color: '#3042a1'
+    - --halo-color: '#FF6B6B'
+  grid:
+    - position: relative
+  custom_fields:
+    news_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 100%
+      - height: 100%
+      - --halo-op: '0.2'
+extra_styles: |
+  .news-svg { width: 100%; height: 100%; display: block; overflow: visible; }

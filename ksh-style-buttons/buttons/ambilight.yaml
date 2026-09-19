@@ -1,0 +1,135 @@
+type: custom:button-card
+entity: light.ambilight_living_room
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      hass.callService('light', 'toggle', { entity_id: entity.entity_id });
+    ]]]
+hold_action:
+  action: more-info
+custom_fields:
+  ambi_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+    class="ambi-svg">
+      <circle cx="120" cy="112" r="106" class="halo" fill="var(--ambi-color)" opacity="0.06"></circle>
+      <g class="spill" opacity="var(--spill-op, 0)">
+        <rect x="30" y="46" width="180" height="120" rx="26" fill="var(--ambi-color)" opacity="0.1" class="spill-outer"></rect>
+        <rect x="42" y="56" width="156" height="100" rx="20" fill="var(--ambi-color)" opacity="0.12"></rect>
+      </g>
+      <g class="led-strip" opacity="var(--strip-op, 0)">
+        <line x1="66" y1="58" x2="102" y2="58" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l1"></line>
+        <line x1="138" y1="58" x2="174" y2="58" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l2"></line>
+        <line x1="182" y1="82" x2="182" y2="118" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l3"></line>
+        <line x1="138" y1="142" x2="174" y2="142" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l4"></line>
+        <line x1="66" y1="142" x2="102" y2="142" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l5"></line>
+        <line x1="58" y1="82" x2="58" y2="118" stroke="var(--ambi-color)" stroke-width="2.5" stroke-linecap="round" class="led l6"></line>
+      </g>
+      <g class="fixture">
+        <rect x="54" y="66" width="132" height="84" rx="10" fill="var(--card-background-color, #000)" stroke="var(--ambi-color)" stroke-width="3.5" class="panel"></rect>
+        <rect x="62" y="74" width="116" height="68" rx="6" fill="none" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.25"></rect>
+        <rect x="76" y="88" width="88" height="40" rx="4" fill="var(--ambi-color)" opacity="0.1" class="screen-glow"></rect>
+        <path d="M104 118 v-16 l14 8 z" fill="none" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linejoin="round" class="play-mark"></path>
+        <path d="M96 96 h-6 M96 120 h-6" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+        <path d="M144 96 h6 M144 120 h6" stroke="var(--ambi-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+        <line x1="120" y1="150" x2="120" y2="166" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linecap="round" opacity="0.55"></line>
+        <path d="M92 176 H148" fill="none" stroke="var(--ambi-color)" stroke-width="3.5" stroke-linecap="round"></path>
+        <circle cx="120" cy="166" r="4" fill="var(--ambi-color)" opacity="0.35" class="stand-dot"></circle>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    ambi_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 110%
+      - height: 110%
+      - --card-background-color: '#000000'
+      - --ambi-color: '#6B6E70'
+      - --spill-op: |
+          [[[
+            if (entity.state !== 'on') return '0';
+            const b = entity.attributes.brightness || 255;
+            return (0.4 + (b / 255) * 0.6).toFixed(2);
+          ]]]
+      - --strip-op: |
+          [[[
+            if (entity.state !== 'on') return '0';
+            const b = entity.attributes.brightness || 255;
+            return (0.45 + (b / 255) * 0.55).toFixed(2);
+          ]]]
+state:
+  - value: 'on'
+    styles:
+      custom_fields:
+        ambi_graphic:
+          - --halo-play: running
+          - --glow-play: running
+          - --hue-play: running
+          - --ambi-color: '#FFC65C'
+          - animation: ambiHue 14s linear infinite
+  - value: 'off'
+    styles:
+      custom_fields:
+        ambi_graphic:
+          - --ambi-color: '#FFFFFF'
+extra_styles: |
+  .ambi-svg { width: 100%; height: 100%; display: block; }
+
+  .halo { transform-box: fill-box; transform-origin: center;
+          animation: ambiHalo 4s ease-in-out infinite; animation-play-state: var(--halo-play, paused); }
+
+  .screen-glow { transform-box: fill-box; transform-origin: center;
+                 animation: ambiPulse 3.5s ease-in-out infinite; animation-play-state: var(--glow-play, paused); }
+
+
+  .spill { transition: opacity .5s; }
+  .led-strip { transition: opacity .5s; }
+
+  .led { animation: ambiBreathe 4.5s ease-in-out infinite;
+         animation-play-state: var(--hue-play, paused); }
+
+  .l1 { animation-delay: 0s; }
+  .l2 { animation-delay: .6s; }
+  .l3 { animation-delay: 1.2s; }
+  .l4 { animation-delay: 1.8s; }
+  .l5 { animation-delay: 2.4s; }
+  .l6 { animation-delay: 3s; }
+
+  @keyframes ambiHalo { 0%, 100% { opacity: .05; } 50% { opacity: .14; } }
+  @keyframes ambiPulse { 0%, 100% { opacity: .08; } 50% { opacity: .18; } }
+  @keyframes ambiBreathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+  @keyframes ambiHue {
+    0%   { --ambi-color: #FFC65C; }
+    16%  { --ambi-color: #FF6B8A; }
+    33%  { --ambi-color: #B06BFF; }
+    50%  { --ambi-color: #00A1E4; }
+    66%  { --ambi-color: #26C6DA; }
+    83%  { --ambi-color: #34C759; }
+    100% { --ambi-color: #FFC65C; }
+  }

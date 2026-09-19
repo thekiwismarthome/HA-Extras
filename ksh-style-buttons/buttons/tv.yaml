@@ -1,0 +1,93 @@
+type: conditional
+conditions:
+  - condition: state
+    entity: remote.tv_samsung_led65
+    state: 'on'
+card:
+  type: custom:button-card
+  entity: remote.tv_samsung_led65
+  aspect_ratio: 1/1
+  show_name: false
+  show_state: false
+  show_icon: false
+  tap_action:
+    action: javascript
+    haptic: heavy
+    javascript: |
+      [[[
+        try {
+          const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+          if (ctx.state === 'suspended') ctx.resume();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.frequency.value = 900;
+          g.gain.setValueAtTime(0.25, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(); o.stop(ctx.currentTime + 0.05);
+        } catch (e) {}
+        hass.callService('remote', 'toggle', { entity_id: entity.entity_id });
+      ]]]
+  hold_action:
+    action: none
+  custom_fields:
+    tv_graphic: >
+      <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+      class="tv-svg">
+        <circle cx="120" cy="120" r="110" fill="var(--tv-color)" opacity="var(--halo-op, 0.08)"></circle>
+        <circle cx="120" cy="120" r="94" fill="none" stroke="var(--tv-color)" stroke-width="3.4"></circle>
+        <circle cx="120" cy="120" r="86" fill="none" stroke="var(--tv-color)" stroke-width="1.2" opacity="0.45"></circle>
+        <g class="tv">
+          <rect x="66" y="74" width="108" height="72" rx="8" fill="var(--card-background-color, #000)" stroke="var(--tv-color)" stroke-width="3.4"></rect>
+          <rect x="74" y="82" width="92" height="56" rx="4" fill="none" stroke="var(--tv-color)" stroke-width="1.2" opacity="0.4"></rect>
+          <path d="M104 166 H136" fill="none" stroke="var(--tv-color)" stroke-width="3.4" stroke-linecap="round"></path>
+          <path d="M120 146 V166" fill="none" stroke="var(--tv-color)" stroke-width="3.4" stroke-linecap="round"></path>
+        </g>
+        <g class="power" opacity="var(--power-op, 0)">
+          <circle cx="120" cy="110" r="22" fill="var(--card-background-color, #000)"></circle>
+          <path d="M120 92 V108" fill="none" stroke="var(--tv-color)" stroke-width="4" stroke-linecap="round"></path>
+          <path d="M107 100 a17 17 0 1 0 26 0" fill="none" stroke="var(--tv-color)" stroke-width="4" stroke-linecap="round"></path>
+        </g>
+      </svg>
+  styles:
+    card:
+      - padding: 0px
+      - background-color: transparent
+      - box-shadow: none
+      - border: none
+    grid:
+      - position: relative
+    custom_fields:
+      tv_graphic:
+        - position: absolute
+        - top: 50%
+        - left: 50%
+        - transform: translate(-50%, -50%)
+        - width: 105%
+        - height: 105%
+        - --card-background-color: '#000000'
+        - --tv-color: '#9BA0A3'
+        - --halo-op: '0.08'
+  extra_styles: >
+    .tv-svg { width: 100%; height: 100%; display: block; }
+
+
+    .tv rect, .tv path, .power path, .power circle, .tv-svg > circle {
+    transition: stroke .3s ease, opacity .3s ease; }
+
+    .power { transition: opacity .3s ease; }
+  state:
+    - value: 'on'
+      styles:
+        custom_fields:
+          tv_graphic:
+            - --tv-color: '#00A1E4'
+            - --power-op: 1
+            - --halo-op: 0.12
+            - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.45))
+    - value: 'off'
+      styles:
+        custom_fields:
+          tv_graphic:
+            - --tv-color: '#FFFFFF'
+            - --power-op: 0

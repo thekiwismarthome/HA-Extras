@@ -1,0 +1,247 @@
+type: conditional
+conditions:
+  - condition: state
+    entity: sensor.washing_machine_appliance_state
+    state_not: Idle
+card:
+  type: custom:button-card
+  entity: sensor.washing_machine_appliance_state
+  triggers_update:
+    - sensor.aeg_washing_machine_time_remaining_hh_mm
+  aspect_ratio: 1/1
+  show_name: false
+  show_state: false
+  show_icon: false
+  tap_action:
+    action: javascript
+    haptic: heavy
+    javascript: |
+      [[[
+        try {
+          const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+          if (ctx.state === 'suspended') ctx.resume();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.frequency.value = 900;
+          g.gain.setValueAtTime(0.25, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(); o.stop(ctx.currentTime + 0.05);
+        } catch (e) {}
+        hass.callService('homeassistant', 'update_entity', { entity_id: entity.entity_id });
+        const ev = new Event('hass-more-info', { bubbles: true, composed: true });
+        ev.detail = { entityId: entity.entity_id };
+        (document.querySelector('home-assistant') || window).dispatchEvent(ev);
+      ]]]
+  hold_action:
+    action: more-info
+  custom_fields:
+    washer_graphic: |
+      [[[
+        const st = entity.state;
+        const t  = states['sensor.aeg_washing_machine_time_remaining_hh_mm'];
+        const tv = (t && t.state && !['unknown','unavailable','none',''].includes(t.state.toLowerCase()))
+                   ? t.state : '--:--';
+
+        const centre =
+          st === 'Unknown'
+            ? '<g class="glyph-warn">' +
+              '<line x1="120" y1="86" x2="120" y2="116" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+              '<circle cx="120" cy="132" r="3.5" fill="var(--wash-color)"></circle>' +
+              '</g>'
+          : st === 'Paused'
+            ? '<g class="glyph-pause">' +
+              '<line x1="106" y1="72" x2="106" y2="96" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+              '<line x1="134" y1="72" x2="134" y2="96" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+              '<text x="120" y="126" class="time-sm" fill="var(--wash-color)">' + tv + '</text>' +
+              '</g>'
+          : st === 'Delayed Start'
+            ? '<g class="glyph-hourglass">' +
+              '<g class="hg-spin">' +
+              '<path d="M106 66 H134 L120 88 Z" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+              '<path d="M106 110 H134 L120 88 Z" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linejoin="round"></path>' +
+              '<line x1="102" y1="66" x2="138" y2="66" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+              '<line x1="102" y1="110" x2="138" y2="110" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></line>' +
+              '</g>' +
+              '<text x="120" y="140" class="time-sm" fill="var(--wash-color)">' + tv + '</text>' +
+              '</g>'
+          : '<text x="120" y="118" class="time-lg" fill="var(--wash-color)">' + tv + '</text>';
+
+        return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="washer-svg">' +
+          '<circle cx="120" cy="120" r="110" class="halo" fill="var(--wash-color)" opacity="var(--halo-op, 0)"></circle>' +
+          '<g class="drum">' +
+            '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--wash-color)" stroke-width="3.5"></circle>' +
+            '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--wash-color)" stroke-width="1.2" opacity="0.45"></circle>' +
+            '<circle cx="120" cy="120" r="72" fill="none" stroke="var(--wash-color)" stroke-width="3.5"></circle>' +
+            '<circle cx="120" cy="120" r="64" fill="none" stroke="var(--wash-color)" stroke-width="1.2" opacity="0.5"></circle>' +
+          '</g>' +
+          '<g class="tumble" opacity="var(--tumble-op, 0)">' +
+            '<g class="tumble-spin">' +
+              '<path d="M120 44 A76 76 0 0 1 173 66" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+              '<path d="M120 196 A76 76 0 0 1 67 174" fill="none" stroke="var(--wash-color)" stroke-width="3.5" stroke-linecap="round"></path>' +
+            '</g>' +
+          '</g>' +
+          '<g class="water" opacity="var(--water-op, 0)">' +
+            '<path d="M74 142 q13 -11 26 0 t26 0 t26 0 t14 0" fill="none" stroke="var(--wash-color)" stroke-width="3" stroke-linecap="round" class="wv v1"></path>' +
+            '<path d="M80 158 q12 -10 24 0 t24 0 t24 0" fill="none" stroke="var(--wash-color)" stroke-width="3" stroke-linecap="round" opacity="0.7" class="wv v2"></path>' +
+            '<circle cx="97" cy="176" r="5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b1"></circle>' +
+            '<circle cx="120" cy="182" r="3.5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b2"></circle>' +
+            '<circle cx="141" cy="175" r="4.5" fill="none" stroke="var(--wash-color)" stroke-width="2.2" class="bub b3"></circle>' +
+          '</g>' +
+          centre +
+        '</svg>';
+      ]]]
+  styles:
+    card:
+      - padding: 0px
+      - background-color: transparent
+      - box-shadow: none
+      - border: none
+    grid:
+      - position: relative
+    custom_fields:
+      washer_graphic:
+        - position: absolute
+        - top: 50%
+        - left: 50%
+        - transform: translate(-50%, -50%)
+        - width: 110%
+        - height: 110%
+        - --card-background-color: '#000000'
+        - --wash-color: '#FFFFFF'
+  extra_styles: >
+    .washer-svg { width: 100%; height: 100%; display: block; }
+
+
+    .time-lg { font-family: var(--paper-font-body1_-_font-family,
+    sans-serif);
+               font-size: 40px; font-weight: 500; text-anchor: middle;
+               letter-spacing: 1px; }
+
+    .time-sm { font-family: var(--paper-font-body1_-_font-family,
+    sans-serif);
+               font-size: 26px; font-weight: 500; text-anchor: middle;
+               letter-spacing: 1px; }
+
+
+    .halo { transform-box: fill-box; transform-origin: center;
+            animation: washHalo 3s ease-in-out infinite;
+            animation-play-state: var(--halo-play, paused); }
+
+
+    .drum circle, .tumble path, .wv, .bub { transition: stroke .45s ease; }
+
+    .tumble { transition: opacity .4s ease; }
+
+    .water { transition: opacity .4s ease; }
+
+    .tumble-spin { transform-box: view-box; transform-origin: 120px 120px;
+                   animation: washSpin 3.5s linear infinite;
+                   animation-play-state: var(--spin-play, paused); }
+
+
+    .wv { transform-box: fill-box; animation: washSlosh 3.4s ease-in-out
+    infinite;
+          animation-play-state: var(--water-play, paused); }
+
+    .v1 { animation-delay: 0s; }
+
+    .v2 { animation-delay: .6s; }
+
+
+    .bub { transform-box: fill-box; transform-origin: center;
+           animation: washBubble 3.8s ease-in-out infinite;
+           animation-play-state: var(--water-play, paused); }
+
+    .b1 { animation-delay: 0s; }
+
+    .b2 { animation-delay: .9s; }
+
+    .b3 { animation-delay: 1.7s; }
+
+
+    .hg-spin { transform-box: fill-box; transform-origin: center;
+               animation: washFlip 6s ease-in-out infinite; }
+
+
+    .glyph-warn { animation: washBlink 1.6s steps(2) infinite; }
+
+
+    @keyframes washHalo   { 0%, 100% { opacity: .04; } 50% { opacity: .15; }
+    }
+
+    @keyframes washSpin   { to { transform: rotate(360deg); } }
+
+    @keyframes washSlosh  { 0%, 100% { transform: translateX(0); }
+                            50% { transform: translateX(5px); } }
+
+    @keyframes washBubble { 0%, 100% { transform: translateY(0) scale(1);
+    opacity: .45; }
+                            50% { transform: translateY(-5px) scale(1.12); opacity: .85; } }
+
+    @keyframes washFlip   { 0%, 45% { transform: rotate(0deg); } 55%, 100% {
+    transform: rotate(180deg); } }
+
+    @keyframes washBlink  { 50% { opacity: .3; } }
+
+    @keyframes washPulse  { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
+  state:
+    - value: Running
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#00A1E4'
+            - --halo-play: running
+            - --halo-op: 0.1
+            - --spin-play: running
+            - --tumble-op: 1
+            - --water-op: 1
+            - --water-play: running
+            - animation: washPulse 2.4s ease-in-out infinite
+            - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.5))
+    - value: Paused
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#FF9F0A'
+            - --tumble-op: 0.3
+            - --water-op: 0.35
+            - filter: drop-shadow(0 0 8px rgba(255, 159, 10, 0.4))
+    - value: Ready To Start
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#34C759'
+            - --tumble-op: 0.35
+            - --water-op: 0.35
+            - filter: drop-shadow(0 0 8px rgba(52, 199, 89, 0.4))
+    - value: Idle
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#FFFFFF'
+            - --water-op: 0.25
+    - value: End Of Cycle
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#B06BFF'
+            - --halo-play: running
+            - --halo-op: 0.12
+            - --water-op: 0.4
+            - animation: washPulse 1.5s ease-in-out infinite
+            - filter: drop-shadow(0 0 12px rgba(176, 107, 255, 0.55))
+    - value: Delayed Start
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#26C6DA'
+            - --tumble-op: 0.25
+            - --water-op: 0.25
+            - filter: drop-shadow(0 0 8px rgba(38, 198, 218, 0.4))
+    - value: Unknown
+      styles:
+        custom_fields:
+          washer_graphic:
+            - --wash-color: '#FF3B30'
+            - filter: drop-shadow(0 0 10px rgba(255, 59, 48, 0.5))

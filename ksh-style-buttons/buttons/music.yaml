@@ -1,0 +1,63 @@
+type: custom:button-card
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      const dashboard = window.location.pathname.split('/')[1] || 'lovelace';
+      history.pushState(null, '', '/' + dashboard + '/music');
+      window.dispatchEvent(new Event('location-changed'));
+    ]]]
+hold_action:
+  action: none
+custom_fields:
+  music_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+    class="music-svg">
+      <circle cx="120" cy="120" r="110" fill="var(--music-color)" opacity="0.08"></circle>
+      <circle cx="120" cy="120" r="94" fill="none" stroke="var(--music-color)" stroke-width="3.4"></circle>
+      <circle cx="120" cy="120" r="86" fill="none" stroke="var(--music-color)" stroke-width="1.2" opacity="0.45"></circle>
+      <g class="eq">
+        <line x1="88"  y1="102" x2="88"  y2="138" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+        <line x1="104" y1="88"  x2="104" y2="152" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+        <line x1="120" y1="78"  x2="120" y2="162" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+        <line x1="136" y1="94"  x2="136" y2="146" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+        <line x1="152" y1="104" x2="152" y2="136" stroke="var(--music-color)" stroke-width="7" stroke-linecap="round"></line>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - --music-color: '#00A1E4'
+  grid:
+    - position: relative
+  custom_fields:
+    music_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 100%
+      - height: 100%
+      - --card-background-color: '#000000'
+      - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.45))
+extra_styles: |
+  .music-svg { width: 100%; height: 100%; display: block; }

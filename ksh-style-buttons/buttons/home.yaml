@@ -1,0 +1,48 @@
+# KSH Style Button — Home (navigation)
+# Behaviour: ksh_tap_beep template → navigates to /<dashboard>/home.
+# Requires the ksh_tap_beep template to be registered (see templates/).
+type: custom:button-card
+template: ksh_tap_beep
+variables:
+  nav: home
+hold_action:
+  action: none
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+custom_fields:
+  home_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+    class="home-svg">
+      <circle cx="120" cy="120" r="110" fill="var(--home-color)" opacity="0.08"></circle>
+      <circle cx="120" cy="120" r="94" fill="none" stroke="var(--home-color)" stroke-width="3.4"></circle>
+      <circle cx="120" cy="120" r="86" fill="none" stroke="var(--home-color)" stroke-width="1.2" opacity="0.45"></circle>
+      <g class="house">
+        <path d="M78 118 L120 82 L162 118 V158 H78 Z" fill="var(--card-background-color, #000)" stroke="var(--home-color)" stroke-width="3.4" stroke-linejoin="round"></path>
+        <path d="M70 124 L120 82 L170 124" fill="none" stroke="var(--home-color)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M108 158 V132 H132 V158" fill="none" stroke="var(--home-color)" stroke-width="3.4" stroke-linejoin="round"></path>
+        <path d="M120 132 V158" fill="none" stroke="var(--home-color)" stroke-width="1.2" opacity="0.4"></path>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - --home-color: '#00A1E4'
+  grid:
+    - position: relative
+  custom_fields:
+    home_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 92%
+      - height: 92%
+      - --card-background-color: '#000000'
+      - filter: drop-shadow(0 0 10px rgba(0, 161, 228, 0.45))
+extra_styles: |
+  .home-svg { width: 100%; height: 100%; display: block; }

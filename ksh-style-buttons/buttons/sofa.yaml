@@ -1,0 +1,155 @@
+type: custom:button-card
+entity: light.sofa_lights
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      if (entity.state === 'on') {
+        hass.callService('light', 'turn_off', { entity_id: entity.entity_id });
+      } else {
+        hass.callService('light', 'turn_on', { entity_id: entity.entity_id, effect: 'solid' });
+      }
+    ]]]
+hold_action:
+  action: more-info
+custom_fields:
+  sofa_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+    class="sofa-svg">
+      <circle cx="120" cy="120" r="110" class="halo" fill="var(--sofa-color)" opacity="var(--halo-op, 0)"></circle>
+      <g transform="translate(120 141) scale(1.12) translate(-120 -141) translate(0 -21)">
+        <g class="backwash" opacity="var(--wash-op, 0)">
+          <rect x="26" y="70" width="188" height="86" rx="30" fill="var(--sofa-color)" opacity="0.1"></rect>
+          <rect x="40" y="80" width="160" height="70" rx="24" fill="var(--sofa-color)" opacity="0.12"></rect>
+        </g>
+        <g class="strip" opacity="var(--strip-op, 0)">
+          <line x1="62" y1="176" x2="98" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s1"></line>
+          <line x1="106" y1="176" x2="134" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s2"></line>
+          <line x1="142" y1="176" x2="178" y2="176" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s3"></line>
+          <line x1="48" y1="140" x2="48" y2="164" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s4"></line>
+          <line x1="192" y1="140" x2="192" y2="164" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round" class="led s5"></line>
+        </g>
+        <g class="furniture">
+          <path d="M56 116 q0 -22 22 -22 h84 q22 0 22 22 v18 h-128 Z" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linejoin="round" class="backrest"></path>
+          <path d="M70 108 q0 -8 8 -8 h84 q8 0 8 8" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.28"></path>
+          <path d="M120 96 v38" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.25"></path>
+          <rect x="40" y="128" width="26" height="42" rx="12" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" class="arm-l"></rect>
+          <rect x="174" y="128" width="26" height="42" rx="12" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" class="arm-r"></rect>
+          <path d="M62 134 h116 q10 0 10 12 v20 q0 8 -10 8 h-116 q-10 0 -10 -8 v-20 q0 -12 10 -12 Z" fill="var(--card-background-color, #000)" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linejoin="round" class="seat"></path>
+          <path d="M120 136 v36" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.25"></path>
+          <path d="M62 146 h116" fill="none" stroke="var(--sofa-color)" stroke-width="0.8" opacity="0.2"></path>
+          <line x1="60" y1="174" x2="60" y2="188" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round"></line>
+          <line x1="180" y1="174" x2="180" y2="188" stroke="var(--sofa-color)" stroke-width="3.5" stroke-linecap="round"></line>
+        </g>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    sofa_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 100%
+      - height: 100%
+      - --card-background-color: '#000000'
+      - --sofa-color: |
+          [[[
+            if (entity.state !== 'on') return '#FFFFFF';
+            const rgb = entity.attributes.rgb_color;
+            if (rgb) return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+            const p = (entity.attributes.brightness || 255) / 255;
+            return 'rgb(' + Math.round(224 + p * 31) + ',' +
+                            Math.round(140 + p * 100) + ',' +
+                            Math.round(30 + p * 166) + ')';
+          ]]]
+      - --wash-op: |
+          [[[
+            if (entity.state !== 'on') return '0';
+            const p = (entity.attributes.brightness || 255) / 255;
+            return (0.4 + p * 0.6).toFixed(2);
+          ]]]
+      - --strip-op: |
+          [[[
+            if (entity.state !== 'on') return '0';
+            const p = (entity.attributes.brightness || 255) / 255;
+            return (0.45 + p * 0.55).toFixed(2);
+          ]]]
+      - --halo-op: |
+          [[[
+            if (entity.state !== 'on') return '0';
+            const p = (entity.attributes.brightness || 255) / 255;
+            return (0.04 + p * 0.13).toFixed(3);
+          ]]]
+      - filter: |
+          [[[
+            if (entity.state !== 'on') return 'none';
+            const rgb = entity.attributes.rgb_color || [255, 214, 130];
+            const p = (entity.attributes.brightness || 255) / 255;
+            return 'drop-shadow(0 0 ' + (3 + p * 14).toFixed(1) + 'px rgba(' +
+                   rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (0.2 + p * 0.5).toFixed(2) + '))';
+          ]]]
+extra_styles: >
+  .sofa-svg { width: 100%; height: 100%; display: block; }
+
+
+  .halo { transform-box: fill-box; transform-origin: center;
+          animation: sofaHalo 4s ease-in-out infinite;
+          animation-play-state: var(--halo-play, paused); }
+
+
+  .furniture path, .furniture rect, .furniture line { transition: stroke
+  .45s ease; }
+
+  .backwash { transition: opacity .5s ease; }
+
+  .strip { transition: opacity .5s ease; }
+
+
+  .led { animation: sofaBreathe 4.5s ease-in-out infinite;
+         animation-play-state: var(--led-play, paused); }
+
+  .s1 { animation-delay: 0s; }
+
+  .s2 { animation-delay: .5s; }
+
+  .s3 { animation-delay: 1s; }
+
+  .s4 { animation-delay: 1.5s; }
+
+  .s5 { animation-delay: 2s; }
+
+
+  @keyframes sofaHalo { 0%, 100% { opacity: .04; } 50% { opacity: .13; } }
+
+  @keyframes sofaBreathe { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+state:
+  - value: 'on'
+    styles:
+      custom_fields:
+        sofa_graphic:
+          - --halo-play: running
+          - --led-play: running

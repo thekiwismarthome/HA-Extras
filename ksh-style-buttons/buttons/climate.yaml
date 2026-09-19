@@ -1,0 +1,137 @@
+type: custom:button-card
+entity: climate.ac_living_room
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      const svc = entity.state === 'off' ? 'turn_on' : 'turn_off';
+      hass.callService('climate', svc, { entity_id: entity.entity_id });
+    ]]]
+hold_action:
+  action: more-info
+custom_fields:
+  mode_graphic: >
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"
+    class="climate-svg">
+      <circle cx="120" cy="120" r="110" class="halo" fill="var(--climate-color)" opacity="0.06"></circle>
+      <g class="unit">
+        <rect x="38" y="62" width="164" height="63" rx="19" fill="var(--card-background-color, #000)" stroke="var(--climate-color)" stroke-width="3.5"></rect>
+        <rect x="46" y="70" width="148" height="47" rx="14" fill="none" stroke="var(--climate-color)" stroke-width="0.8" opacity="0.25"></rect>
+        <path d="M38 105 H202" fill="none" stroke="var(--climate-color)" stroke-width="2.5"></path>
+        <path d="M62 84 H100" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M62 93 H88" fill="none" stroke="var(--climate-color)" stroke-width="0.8" opacity="0.3" stroke-linecap="round"></path>
+        <circle cx="180" cy="88" r="5" fill="var(--climate-color)" opacity="0.35" class="status-dot"></circle>
+      </g>
+      <g class="airflow">
+        <path d="M82 158 q19 -22 38 0 t38 0" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round" class="wave w1"></path>
+        <path d="M91 192 q14 -17 29 0 t29 0" fill="none" stroke="var(--climate-color)" stroke-width="2.5" stroke-linecap="round" class="wave w2"></path>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    mode_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 110%
+      - height: 110%
+      - --card-background-color: '#000000'
+      - --climate-color: '#FFFFFF'
+extra_styles: >
+  .climate-svg { width: 100%; height: 100%; display: block; }
+
+
+  .halo { transform-box: fill-box; transform-origin: center;
+          animation: acHalo 3.5s ease-in-out infinite;
+          animation-play-state: var(--halo-play, paused); }
+
+  .status-dot { animation: acPulse 2.6s ease-in-out infinite;
+                animation-play-state: var(--dot-play, paused); }
+
+
+  .wave { opacity: var(--wave-op, 0); transition: opacity .4s; }
+
+  .w1 { animation: acDrift 3.2s ease-in-out infinite;
+        animation-play-state: var(--wave-play, paused); }
+
+  .w2 { animation: acDrift 3.2s ease-in-out infinite .5s;
+        animation-play-state: var(--wave-play, paused); }
+
+
+  @keyframes acHalo { 0%, 100% { opacity: .04; } 50% { opacity: .13; } }
+
+  @keyframes acPulse { 0%, 100% { opacity: .25; } 50% { opacity: .6; } }
+
+  @keyframes acDrift { 0%, 100% { transform: translateY(0); } 50% {
+  transform: translateY(5px); } }
+state:
+  - value: heat
+    styles:
+      custom_fields:
+        mode_graphic:
+          - --climate-color: '#FF6B35'
+          - --halo-play: running
+          - --dot-play: running
+          - --wave-play: running
+          - --wave-op: 1
+          - filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.55))
+  - value: cool
+    styles:
+      custom_fields:
+        mode_graphic:
+          - --climate-color: '#00A1E4'
+          - --halo-play: running
+          - --dot-play: running
+          - --wave-play: running
+          - --wave-op: 1
+          - filter: drop-shadow(0 0 8px rgba(0, 161, 228, 0.55))
+  - value: dry
+    styles:
+      custom_fields:
+        mode_graphic:
+          - --climate-color: '#26C6DA'
+          - --halo-play: running
+          - --dot-play: running
+          - --wave-play: running
+          - --wave-op: 1
+          - filter: drop-shadow(0 0 8px rgba(38, 198, 218, 0.5))
+  - value: auto
+    styles:
+      custom_fields:
+        mode_graphic:
+          - --climate-color: '#34C759'
+          - --halo-play: running
+          - --dot-play: running
+          - --wave-play: running
+          - --wave-op: 1
+          - filter: drop-shadow(0 0 8px rgba(52, 199, 89, 0.5))
+  - value: 'off'
+    styles:
+      custom_fields:
+        mode_graphic:
+          - --climate-color: '#FFFFFF'
+          - --wave-op: 1

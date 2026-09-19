@@ -1,0 +1,90 @@
+type: custom:button-card
+entity: sensor.view_assist_timer_state
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: javascript
+  haptic: heavy
+  javascript: |
+    [[[
+      try {
+        const ctx = window.__haClickCtx || (window.__haClickCtx = new (window.AudioContext || window.webkitAudioContext)());
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 900;
+        g.gain.setValueAtTime(0.25, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+      const dashboard = window.location.pathname.split('/')[1] || 'lovelace';
+      history.pushState(null, '', '/' + dashboard + '/alarms');
+      window.dispatchEvent(new Event('location-changed'));
+    ]]]
+hold_action:
+  action: none
+custom_fields:
+  alarm_graphic: |
+    [[[
+      const s = entity ? entity.state : 'idle';
+      const ringing = s === 'ringing';
+      const active  = s === 'active' || ringing;
+      const col = ringing ? '#FF3B30' : (active ? '#FF9F0A' : '#FFFFFF');
+      const ringPlay = ringing ? 'running' : 'paused';
+
+      return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="alarm-svg" style="--alarm-color:' + col + ';--ring-play:' + ringPlay + '">' +
+        '<circle cx="120" cy="120" r="110" fill="var(--alarm-color)" opacity="' + (active ? '0.12' : '0.08') + '"></circle>' +
+        '<circle cx="120" cy="120" r="94" fill="none" stroke="var(--alarm-color)" stroke-width="3.4"></circle>' +
+        '<circle cx="120" cy="120" r="86" fill="none" stroke="var(--alarm-color)" stroke-width="1.2" opacity="0.45"></circle>' +
+        '<g class="clock">' +
+          '<circle cx="120" cy="124" r="46" fill="var(--card-background-color, #000)" stroke="var(--alarm-color)" stroke-width="3.4"></circle>' +
+          '<circle cx="120" cy="124" r="38" fill="none" stroke="var(--alarm-color)" stroke-width="1.2" opacity="0.4"></circle>' +
+          '<path d="M120 124 V100" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+          '<path d="M120 124 L138 132" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+          '<circle cx="120" cy="124" r="3.5" fill="var(--alarm-color)"></circle>' +
+          '<path d="M84 82 L98 96" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+          '<path d="M156 82 L142 96" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+          '<path d="M90 70 a20 20 0 0 1 26 4" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+          '<path d="M150 70 a20 20 0 0 0 -26 4" fill="none" stroke="var(--alarm-color)" stroke-width="3.4" stroke-linecap="round"></path>' +
+        '</g>' +
+      '</svg>';
+    ]]]
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - position: relative
+  custom_fields:
+    alarm_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 105%
+      - height: 105%
+      - --card-background-color: '#000000'
+      - filter: |
+          [[[
+            const s = entity ? entity.state : 'idle';
+            if (s === 'ringing') return 'drop-shadow(0 0 14px rgba(255, 59, 48, 0.55))';
+            if (s === 'active')  return 'drop-shadow(0 0 12px rgba(255, 159, 10, 0.5))';
+            return 'none';
+          ]]]
+extra_styles: |
+  .alarm-svg { width: 100%; height: 100%; display: block; }
+
+  .clock { transform-box: view-box; transform-origin: 120px 124px;
+           animation: alarmRing 0.5s ease-in-out infinite;
+           animation-play-state: var(--ring-play, paused); }
+
+
+  @keyframes alarmRing {
+    0%, 100% { transform: rotate(-5deg); }
+    50%      { transform: rotate(5deg); }
+  }
