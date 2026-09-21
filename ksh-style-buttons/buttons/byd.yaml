@@ -1,8 +1,9 @@
 # KSH Style Button — BYD (EV)  ·  STATIC / no-JavaScript version
 # =============================================================================
 #  A pure inline-SVG tile like climate.yaml / home.yaml — no [[[ ]]] templates
-#  anywhere, so it renders on any button-card setup. Colour + glow are driven
-#  by button-card `state:` blocks off the battery %.
+#  anywhere, so it renders on any button-card setup. A sleek fastback coupe-SUV
+#  silhouette (aero wheels, soft gradient fill, glow) recoloured by battery %
+#  via button-card `state:` blocks.
 #
 #  entity   = your BYD state-of-charge sensor (a number 0-100).
 #             Change it to match your car if yours differs.
@@ -27,22 +28,32 @@ tap_action:
 hold_action:
   action: more-info
 custom_fields:
-  byd_graphic: >
+  byd_graphic: |
     <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="byd-svg">
-      <circle cx="120" cy="120" r="110" fill="var(--byd-color)" opacity="var(--halo-op, 0.06)"></circle>
-      <circle cx="120" cy="120" r="94" fill="none" stroke="var(--byd-color)" stroke-width="3.4"></circle>
-      <circle cx="120" cy="120" r="86" fill="none" stroke="var(--byd-color)" stroke-width="1.2" opacity="0.4"></circle>
-      <g class="car" transform="translate(0,6)">
-        <path d="M52 128 L52 118 Q53 111 62 109 L86 103 L100 84 Q104 79 112 79 L146 79 Q156 79 162 88 L176 106 L186 109 Q194 111 194 120 L194 128 Z" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="3.5" stroke-linejoin="round"></path>
-        <path d="M124 80 L124 103" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.5"></path>
-        <path d="M104 101 L114 86 Q116 83 121 83 L121 101 Z" fill="none" stroke="var(--byd-color)" stroke-width="0.9" opacity="0.3"></path>
-        <path d="M127 83 L143 83 Q150 83 155 90 L162 100 L127 101 Z" fill="none" stroke="var(--byd-color)" stroke-width="0.9" opacity="0.3"></path>
-        <path d="M74 128 L172 128" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.35"></path>
-        <circle cx="86" cy="130" r="16" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="3.4"></circle>
-        <circle cx="86" cy="130" r="6" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.6"></circle>
-        <circle cx="160" cy="130" r="16" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="3.4"></circle>
-        <circle cx="160" cy="130" r="6" fill="none" stroke="var(--byd-color)" stroke-width="2.2" opacity="0.6"></circle>
-      </g>
+      <defs>
+        <linearGradient id="bydFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--byd-color)" stop-opacity="0.26"></stop>
+          <stop offset="1" stop-color="var(--byd-color)" stop-opacity="0.04"></stop>
+        </linearGradient>
+      </defs>
+      <circle cx="120" cy="120" r="110" fill="var(--byd-color)" opacity="var(--halo-op, 0.05)"></circle>
+      <!-- sleek fastback coupe-SUV silhouette -->
+      <path d="M30 148 C30 140 33 137 41 135 L52 132 C60 116 74 104 104 102 C120 101 132 101 150 103 C168 105 180 112 192 124 L206 128 C214 130 216 134 216 141 L216 148 Z" fill="url(#bydFill)" stroke="var(--byd-color)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></path>
+      <path d="M56 132 L206 128" fill="none" stroke="var(--byd-color)" stroke-width="1.6" opacity="0.3"></path>
+      <path d="M72 128 C78 116 90 108 108 108 L120 108 L120 128 Z" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="2.2" stroke-linejoin="round"></path>
+      <path d="M126 108 L146 109 C160 111 170 116 178 126 L126 128 Z" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="2.2" stroke-linejoin="round"></path>
+      <path d="M96 122 L112 122" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
+      <!-- rear aero wheel -->
+      <circle cx="78" cy="150" r="24" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="4"></circle>
+      <circle cx="78" cy="150" r="15" fill="none" stroke="var(--byd-color)" stroke-width="2" opacity="0.55"></circle>
+      <path d="M78 150 L78 136 M78 150 L91.3 145.7 M78 150 L86.2 161.3 M78 150 L69.8 161.3 M78 150 L64.7 145.7" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
+      <circle cx="78" cy="150" r="3.2" fill="var(--byd-color)"></circle>
+      <!-- front aero wheel -->
+      <circle cx="176" cy="150" r="24" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="4"></circle>
+      <circle cx="176" cy="150" r="15" fill="none" stroke="var(--byd-color)" stroke-width="2" opacity="0.55"></circle>
+      <path d="M176 150 L176 136 M176 150 L189.3 145.7 M176 150 L184.2 161.3 M176 150 L167.8 161.3 M176 150 L162.7 145.7" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
+      <circle cx="176" cy="150" r="3.2" fill="var(--byd-color)"></circle>
+      <path d="M46 182 L196 182" stroke="var(--byd-color)" stroke-width="3" stroke-linecap="round" opacity="var(--ground-op, 0.28)"></path>
     </svg>
 styles:
   card:
