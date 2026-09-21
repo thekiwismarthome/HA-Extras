@@ -1,9 +1,8 @@
 # KSH Style Button — BYD (EV)  ·  STATIC / no-JavaScript version
 # =============================================================================
 #  A pure inline-SVG tile like climate.yaml / home.yaml — no [[[ ]]] templates
-#  anywhere, so it renders on any button-card setup. A sleek fastback coupe-SUV
-#  silhouette (aero wheels, soft gradient fill, glow) recoloured by battery %
-#  via button-card `state:` blocks.
+#  anywhere, so it renders on any button-card setup. The BYD wordmark logo,
+#  recoloured by battery % via button-card `state:` blocks, with a soft glow.
 #
 #  entity   = your BYD state-of-charge sensor (a number 0-100).
 #             Change it to match your car if yours differs.
@@ -30,30 +29,14 @@ hold_action:
 custom_fields:
   byd_graphic: |
     <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="byd-svg">
-      <defs>
-        <linearGradient id="bydFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="var(--byd-color)" stop-opacity="0.26"></stop>
-          <stop offset="1" stop-color="var(--byd-color)" stop-opacity="0.04"></stop>
-        </linearGradient>
-      </defs>
       <circle cx="120" cy="120" r="110" fill="var(--byd-color)" opacity="var(--halo-op, 0.05)"></circle>
-      <!-- sleek fastback coupe-SUV silhouette -->
-      <path d="M30 148 C30 140 33 137 41 135 L52 132 C60 116 74 104 104 102 C120 101 132 101 150 103 C168 105 180 112 192 124 L206 128 C214 130 216 134 216 141 L216 148 Z" fill="url(#bydFill)" stroke="var(--byd-color)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></path>
-      <path d="M56 132 L206 128" fill="none" stroke="var(--byd-color)" stroke-width="1.6" opacity="0.3"></path>
-      <path d="M72 128 C78 116 90 108 108 108 L120 108 L120 128 Z" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="2.2" stroke-linejoin="round"></path>
-      <path d="M126 108 L146 109 C160 111 170 116 178 126 L126 128 Z" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="2.2" stroke-linejoin="round"></path>
-      <path d="M96 122 L112 122" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
-      <!-- rear aero wheel -->
-      <circle cx="78" cy="150" r="24" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="4"></circle>
-      <circle cx="78" cy="150" r="15" fill="none" stroke="var(--byd-color)" stroke-width="2" opacity="0.55"></circle>
-      <path d="M78 150 L78 136 M78 150 L91.3 145.7 M78 150 L86.2 161.3 M78 150 L69.8 161.3 M78 150 L64.7 145.7" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
-      <circle cx="78" cy="150" r="3.2" fill="var(--byd-color)"></circle>
-      <!-- front aero wheel -->
-      <circle cx="176" cy="150" r="24" fill="var(--card-background-color, #000)" stroke="var(--byd-color)" stroke-width="4"></circle>
-      <circle cx="176" cy="150" r="15" fill="none" stroke="var(--byd-color)" stroke-width="2" opacity="0.55"></circle>
-      <path d="M176 150 L176 136 M176 150 L189.3 145.7 M176 150 L184.2 161.3 M176 150 L167.8 161.3 M176 150 L162.7 145.7" stroke="var(--byd-color)" stroke-width="2" stroke-linecap="round" opacity="0.5"></path>
-      <circle cx="176" cy="150" r="3.2" fill="var(--byd-color)"></circle>
-      <path d="M46 182 L196 182" stroke="var(--byd-color)" stroke-width="3" stroke-linecap="round" opacity="var(--ground-op, 0.28)"></path>
+      <!-- BYD wordmark (bbox 30..570 x 248..351; centred + scaled into the 240 grid) -->
+      <g transform="translate(120,120) scale(0.38) translate(-300,-299.5)" fill="var(--byd-color)">
+        <path d="M0,0 L123,0 L135,2 L145,7 L152,14 L156,21 L157,25 L157,36 L154,44 L149,51 L153,58 L156,63 L157,67 L157,78 L154,86 L145,96 L135,101 L122,103 L1,103 L-1,101 L-1,85 L1,84 L124,83 L133,80 L135,71 L132,65 L125,62 L1,61 L-1,59 L-1,44 L1,42 L124,41 L131,38 L134,35 L135,30 L133,23 L124,20 L1,19 L-1,18 L-1,1 Z" transform="translate(31,248)"></path>
+        <path d="M0,0 L20,0 L21,1 L22,33 L24,40 L27,43 L30,44 L66,45 L67,46 L67,63 L66,64 L19,64 L9,61 L2,55 L-1,45 L-1,1 Z" transform="translate(214,248)"></path>
+        <path d="M0,0 L20,0 L21,1 L21,44 L19,52 L16,57 L11,61 L0,64 L-47,65 L-48,102 L-49,103 L-73,103 L-74,102 L-74,46 L-73,45 L-10,44 L-5,41 L-3,38 L-2,31 L-1,1 Z" transform="translate(366,248)"></path>
+        <path d="M0,0 L95,0 L115,2 L129,7 L142,16 L149,24 L155,37 L157,45 L157,58 L153,71 L148,80 L141,88 L127,97 L115,101 L95,103 L0,103 L-2,99 L-2,87 L0,84 L91,83 L110,81 L122,76 L130,68 L134,58 L134,45 L130,35 L122,27 L110,22 L91,20 L0,19 L-2,15 L-2,3 Z" transform="translate(413,248)"></path>
+      </g>
     </svg>
 styles:
   card:
