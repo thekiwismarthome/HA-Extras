@@ -28,6 +28,7 @@ variables:
   show_all: true
   devices: []
   node_overrides: {}
+  config_entity: input_text.intercom_config   # graphical setup helper (optional)
 custom_fields:
   hub: |
     [[[
@@ -38,6 +39,18 @@ custom_fields:
       const esc = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       const v = variables || {};
       const ov = v.node_overrides || {};
+
+      // config: prefer the graphical setup helper, else fall back to card variables
+      let MY = v.my_device, SHOWALL = v.show_all, DEVS = Array.isArray(v.devices) ? v.devices : [];
+      const cfgEnt = v.config_entity || 'input_text.intercom_config';
+      const cfgRaw = hass.states[cfgEnt] ? hass.states[cfgEnt].state : '';
+      if (cfgRaw && cfgRaw.indexOf('~') >= 0) {
+        const cp = cfgRaw.split('~');
+        if (cp[0]) MY = cp[0];
+        SHOWALL = cp[1] === '1';
+        DEVS = cp[2] ? cp[2].split('|').filter(Boolean) : [];
+      }
+
       const svcs = (hass.services && hass.services.esphome) ? Object.keys(hass.services.esphome) : [];
       const nodes = svcs.filter(k => /_intercom_call$/.test(k)).map(k => k.replace(/_intercom_call$/,''));
 
@@ -54,19 +67,19 @@ custom_fields:
           return { id, name, norm:n, node, state: st.state, talkingTo };
         });
 
-      const me = devices.find(d => d.norm === norm(v.my_device));
+      const me = devices.find(d => d.norm === norm(MY));
       const myNode = me ? me.node : '';
       // busy = any state that isn't an idle-like one (robust to exact wording/case)
       const IDLE = ['idle','ended','off','unavailable','unknown','none',''];
       const busy = s => !IDLE.includes((s == null ? '' : String(s)).trim().toLowerCase());
       const admin = !!(hass.user && hass.user.is_admin);
 
-      let targets = devices.filter(d => d.norm !== norm(v.my_device));
-      if (!v.show_all && Array.isArray(v.devices) && v.devices.length)
-        targets = targets.filter(d => v.devices.map(norm).includes(d.norm));
+      let targets = devices.filter(d => d.norm !== norm(MY));
+      if (!SHOWALL && Array.isArray(DEVS) && DEVS.length)
+        targets = targets.filter(d => DEVS.map(norm).includes(d.norm));
 
       let out = `<div class="ic-wrap">`;
-      out += `<div class="ic-head"><span class="ic-h-title">INTERCOM</span><span class="ic-h-sub">${me ? me.name : (v.my_device || '?')}</span></div>`;
+      out += `<div class="ic-head"><span class="ic-h-title">INTERCOM</span><span class="ic-h-sub">${me ? me.name : (MY || '?')}</span></div>`;
 
       if (devices.length === 0) out += `<div class="ic-empty">No intercom sensors found</div>`;
       if (!myNode) out += `<div class="ic-warn">Set <b>my_device</b> to this tablet's name (couldn't match a node)</div>`;
