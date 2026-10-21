@@ -25,8 +25,7 @@ ksh-style-buttons/
 │  ├─ calendar.yaml                               ← live date tile (CSS-only): big day + month
 │  ├─ intercom.yaml   intercom-picker.yaml        ← phone button + auto-listing call picker
 │  ├─ intercom-card.yaml                          ← standalone always-visible call list
-│  ├─ intercom-hub.yaml                           ← live intercom board: auto-discover, status, admin end
-│  ├─ intercom-setup.yaml                         ← graphical config card (writes input_text helper)
+│  ├─ intercom-hub.yaml                           ← self-contained intercom: board + built-in setup (gear)
 │  ├─ light.yaml    climate.yaml  vacuum.yaml     ← entity tiles
 │  ├─ ambilight.yaml tv.yaml      music.yaml
 │  ├─ alarm.yaml    sofa.yaml
@@ -218,8 +217,7 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **intercom** | toggle | phone button (`mdi:phone`) that opens the call picker (toggles `input_boolean.intercom_menu`) |
 | **intercom-picker** | call‑service | popup overlay (a `conditional` card) that rings another **Kiosk Satellite**: calls this tablet's own `esphome.<node>_intercom_call` with `kiosk: <target name>`, plus a hang‑up row. Configure `call_service` + `targets`; needs the `input_boolean.intercom_menu` helper |
 | **intercom-card** | — | the same call list as a **standalone always‑visible card** (no helper/popup). Configure `call_service` (this tablet's own action) + `targets` (friendly names of the other kiosks); each row rings via `kiosk:`, plus a hang‑up row |
-| **intercom-hub** | — | **live intercom board**. Auto‑discovers every kiosk from its `sensor.<x>_intercom` sensor + matches the ESPHome node from the `*_intercom_call` services. Idle devices tap‑to‑call; busy devices show who they're with (from `*_intercom_kiosk`); an in‑call banner + hang‑up for your own device; **admin‑only** End buttons to terminate any call. Reads config from the setup helper (or its own `my_device`/`show_all`/`devices`/`node_overrides` variables) |
-| **intercom-setup** | — | **graphical setup card** — tap to pick *this device*, toggle *show all* vs individual devices (checkboxes), saved to an `input_text.intercom_config` helper the hub reads. Make config point‑and‑tap, no YAML. Needs a Text helper `input_text.intercom_config` (max length 255) |
+| **intercom-hub** | — | **self-contained live intercom**. Auto‑discovers every kiosk from its `sensor.<x>_intercom` sensor + matches the ESPHome node from the `*_intercom_call` services. Idle devices tap‑to‑call; busy devices show who they're with; in‑call banner + hang‑up; **admin‑only** End buttons. A **gear** in the header flips the same card into **Setup** (pick this device, show‑all vs choose, checkboxes) saved to an `input_text.intercom_config` helper (max length 255) |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |
