@@ -24,6 +24,7 @@ ksh-style-buttons/
 │  ├─ byd.yaml                                    ← EV tile (static SVG): red BYD wordmark + faded halo
 │  ├─ calendar.yaml                               ← live date tile (CSS-only): big day + month
 │  ├─ intercom.yaml   intercom-picker.yaml        ← phone button + auto-listing call picker
+│  ├─ intercom-card.yaml                          ← standalone always-visible call list
 │  ├─ light.yaml    climate.yaml  vacuum.yaml     ← entity tiles
 │  ├─ ambilight.yaml tv.yaml      music.yaml
 │  ├─ alarm.yaml    sofa.yaml
@@ -214,6 +215,7 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **calendar** | call‑service | live date tile: big day number + month, drawn with **pure CSS** (border + gradient band, no SVG/custom_fields) so it survives old tablet webviews; day/month via `name`/`label` text templates. Needs a reasonably current button‑card (older versions ignore `styles`) |
 | **intercom** | toggle | phone button (`mdi:phone`) that opens the call picker (toggles `input_boolean.intercom_menu`) |
 | **intercom-picker** | call‑service | popup overlay (a `conditional` card) that **auto‑lists every `esphome.ks_*_intercom_call` service**, prettifies the device name, and calls the one you tap. Needs the `input_boolean.intercom_menu` helper and button‑card templated‑HTML rendering |
+| **intercom-card** | call‑service | the same auto‑listing call list as a **standalone always‑visible card** — no helper, no popup, no conditional. Drop it on a view |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |

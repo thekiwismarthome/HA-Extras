@@ -1,0 +1,60 @@
+# KSH Style — Intercom Call Card (standalone)
+# =============================================================================
+#  A self-contained card that auto-lists every ESPHome service matching
+#  ks_*_intercom_call and calls the one you tap. No helper, no popup, no
+#  conditional — just drop it on a view.
+#
+#  >>> Requires button-card to render templated HTML custom-fields. If the list
+#      comes up blank on the tablet, that feature isn't rendering there — tell
+#      Claude and switch to the manual per-device grid instead.
+# =============================================================================
+type: custom:button-card
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: none
+custom_fields:
+  list: |
+    [[[
+      const PHONE = `<svg viewBox="0 0 24 24" style="width:1.4em;height:1.4em;vertical-align:middle;fill:currentColor"><path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/></svg>`;
+      const svcs = (hass && hass.services && hass.services.esphome) ? Object.keys(hass.services.esphome) : [];
+      const keys = svcs.filter(k => /^ks_.+_intercom_call$/.test(k)).sort();
+      const tc = s => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      let out = `<div class="ic-wrap">`;
+      out += `<div class="ic-title">CALL A DEVICE</div>`;
+      if (keys.length === 0) out += `<div class="ic-empty">No intercom devices found</div>`;
+      keys.forEach(k => {
+        const name = tc(k.replace(/^ks_/, '').replace(/_intercom_call$/, ''));
+        const click = `document.querySelector('home-assistant').hass.callService('esphome','${k}',{});event.stopPropagation();`;
+        out += `<div class="ic-row" onclick="${click}"><span class="ic-ph">${PHONE}</span><span>${name}</span></div>`;
+      });
+      out += `</div>`;
+      return out;
+    ]]]
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
+    - width: 100%
+  custom_fields:
+    list:
+      - width: 100%
+extra_styles: |
+  .ic-wrap { font-family: Antonio, 'Roboto Condensed', sans-serif;
+             background: rgba(12,12,12,0.97);
+             border: 1px solid rgba(255,255,255,0.12);
+             border-radius: 22px; padding: 18px 16px;
+             box-shadow: 0 10px 34px rgba(0,0,0,0.5); }
+  .ic-title { color: #8b8f93; font-weight: 600; letter-spacing: 3px;
+              font-size: 15px; text-align: center; margin: 4px 0 14px; }
+  .ic-row { display: flex; align-items: center; gap: 14px;
+            padding: 15px 16px; margin: 8px 0; border-radius: 14px;
+            background: rgba(255,255,255,0.05); color: #fff;
+            font-size: 21px; font-weight: 600; cursor: pointer; }
+  .ic-row:active { background: rgba(52,199,89,0.18); }
+  .ic-ph { color: #34C759; display: inline-flex; }
+  .ic-empty { color: #777; text-align: center; padding: 24px; font-size: 18px; }
