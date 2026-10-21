@@ -1,18 +1,15 @@
 # KSH Style Button — Calendar (live date)  ·  CSS-only, max-compatibility build
 # =============================================================================
-#  Your button-card renders name/label TEXT but was ignoring `styles` and
-#  `custom_fields` (and inline SVG) — the classic sign of an OUTDATED
-#  custom:button-card. Update it in HACS (Frontend -> Button Card -> update)
-#  and hard-refresh / clear the tablet's cache.
-#
-#  This build uses NO svg and NO custom_fields — the whole calendar is drawn
-#  with plain CSS (border + white gradient band) so it renders on old tablet
-#  webviews once button-card itself is current:
+#  No svg, no custom_fields — the calendar is drawn with plain CSS so it works
+#  on old tablet webviews (needs a current button-card; older ones ignore
+#  `styles`). The bordered box is INSET (card padding) so it matches the
+#  footprint of the other KSH icons instead of filling the whole tile.
 #    - day number -> native `name`  text template
 #    - month      -> native `label` text template
-#    - body/band  -> styles.card border + background gradient
+#    - body/band  -> styles.grid border + background gradient (inner box)
 #
 #  Tap = set the kitchen tablet's calendar view to "Schedule".
+#  Size: tweak `padding` on styles.card (bigger % = smaller calendar).
 # =============================================================================
 type: custom:button-card
 aspect_ratio: 1/1
@@ -38,12 +35,20 @@ hold_action:
   action: none
 styles:
   card:
-    - padding: 0px
+    - padding: 12%            # inset -> inner box ~76% of the tile (match other icons)
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  grid:
     - position: relative
+    - width: 100%
+    - height: 100%
+    - box-sizing: border-box
     - border: '4px solid #FFFFFF'
-    - border-radius: 20px
+    - border-radius: 16px
     - background: 'linear-gradient(#FFFFFF 0, #FFFFFF 26%, rgba(0,0,0,0) 26%)'
     - box-shadow: '0 0 12px rgba(255, 255, 255, 0.18)'
+    - overflow: visible
   name:
     - position: absolute
     - top: 62%
@@ -52,7 +57,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 64px
+    - font-size: 48px
     - line-height: '1'
     - color: '#FFFFFF'
     - text-align: center
@@ -64,7 +69,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 18px
-    - letter-spacing: 3px
+    - font-size: 14px
+    - letter-spacing: 2px
     - color: '#000000'
     - text-align: center
