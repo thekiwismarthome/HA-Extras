@@ -19,6 +19,8 @@ ksh-style-buttons/
 ├─ README.md                     ← you are here
 ├─ templates/
 │  └─ ksh-style-buttons.yaml      ← reusable button_card_templates (ksh_tap_beep behaviour)
+├─ cards/
+│  └─ ksh-intercom-card.js        ← proper custom Lovelace card (intercom + built-in editor)
 ├─ buttons/                       ← one self‑contained tile per file
 │  ├─ home.yaml     news.yaml     shares.yaml     ← navigation tiles (use the template)
 │  ├─ byd.yaml                                    ← EV tile (static SVG): red BYD wordmark + faded halo
@@ -38,7 +40,27 @@ Each file in `buttons/` is a complete `custom:button-card` you can paste into a 
 
 ---
 
+## The custom intercom card (`cards/ksh-intercom-card.js`)
+
+A **proper custom Lovelace card** — the intercom board with a real **config editor**, so
+you set it up by editing the card in the UI (no helpers, no YAML, no templated‑HTML
+workarounds). Config lives in the card's own YAML, so each tablet's `my_device` is
+independent.
+
+**Install**
+1. Copy `cards/ksh-intercom-card.js` to `<config>/www/ksh-intercom-card.js`.
+2. Settings → Dashboards → ⋮ → **Resources** → **Add resource** → URL `/local/ksh-intercom-card.js`, type **JavaScript Module**. Hard‑refresh.
+3. Edit a dashboard → **Add card** → search **KSH Intercom**. Click the card's ✏️ edit to pick **this device** and which others to show.
+
+**What it does:** auto‑discovers kiosks from `sensor.*_intercom`, matches each to its
+ESPHome node via the `*_intercom_call` services; idle devices tap‑to‑call, busy devices
+show who they're with, an in‑call banner + Hang up for your own device, and **admin‑only**
+End buttons. Config: `my_device`, `show_all` / `devices`, `node_overrides`.
+
+---
+
 ## Requirements
+
 
 | Need | Why |
 |------|-----|
