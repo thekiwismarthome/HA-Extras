@@ -39,20 +39,20 @@ card:
         const hangup = action.replace(/_intercom_call$/, '_intercom_hangup');
         const targets = Array.isArray(v.targets) ? v.targets : [];
         const close = `document.querySelector('home-assistant').hass.callService('input_boolean','turn_off',{entity_id:'input_boolean.intercom_menu'});`;
-        let out = `<div class="ic-wrap" onclick="event.stopPropagation();">`;
+        let out = `<div class="ic-wrap" onpointerup="event.stopPropagation();">`;
         out += `<div class="ic-title">CALL A DEVICE</div>`;
         if (!action) out += `<div class="ic-empty">Set variables.call_service</div>`;
         else if (targets.length === 0) out += `<div class="ic-empty">No targets configured</div>`;
         targets.forEach(name => {
           const esc = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
           const click = `var h=document.querySelector('home-assistant').hass;h.callService('${domain}','${action}',{kiosk:'${esc}'});${close}event.stopPropagation();`;
-          out += `<div class="ic-row" onclick="${click}"><span class="ic-ph">${PHONE}</span><span>${name}</span></div>`;
+          out += `<div class="ic-row" onpointerup="${click}"><span class="ic-ph">${PHONE}</span><span>${name}</span></div>`;
         });
         if (action) {
           const hclick = `var h=document.querySelector('home-assistant').hass;h.callService('${domain}','${hangup}',{});${close}event.stopPropagation();`;
-          out += `<div class="ic-row ic-hangup" onclick="${hclick}"><span class="ic-ph ic-ph-red">${HANGUP}</span><span>Hang up</span></div>`;
+          out += `<div class="ic-row ic-hangup" onpointerup="${hclick}"><span class="ic-ph ic-ph-red">${HANGUP}</span><span>Hang up</span></div>`;
         }
-        out += `<div class="ic-close" onclick="${close}event.stopPropagation();">CLOSE</div>`;
+        out += `<div class="ic-close" onpointerup="${close}event.stopPropagation();">CLOSE</div>`;
         out += `</div>`;
         return out;
       ]]]

@@ -41,11 +41,11 @@ custom_fields:
       targets.forEach(name => {
         const esc = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         const click = `document.querySelector('home-assistant').hass.callService('${domain}','${action}',{kiosk:'${esc}'});event.stopPropagation();`;
-        out += `<div class="ic-row" onclick="${click}"><span class="ic-ph">${PHONE}</span><span>${name}</span></div>`;
+        out += `<div class="ic-row" onpointerup="${click}"><span class="ic-ph">${PHONE}</span><span>${name}</span></div>`;
       });
       if (action) {
         const hclick = `document.querySelector('home-assistant').hass.callService('${domain}','${hangup}',{});event.stopPropagation();`;
-        out += `<div class="ic-row ic-hangup" onclick="${hclick}"><span class="ic-ph ic-ph-red">${HANGUP}</span><span>Hang up</span></div>`;
+        out += `<div class="ic-row ic-hangup" onpointerup="${hclick}"><span class="ic-ph ic-ph-red">${HANGUP}</span><span>Hang up</span></div>`;
       }
       out += `</div>`;
       return out;
