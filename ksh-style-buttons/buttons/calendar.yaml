@@ -68,7 +68,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 10cqh               # scales with the card height
+    - font-size: 13cqh               # scales with the card height
     - letter-spacing: 0.15em
     - color: black
     - text-align: center
