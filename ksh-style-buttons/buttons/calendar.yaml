@@ -1,13 +1,15 @@
-# KSH Style Button — Calendar (live date)  ·  CSS-only, max-compatibility build
+# KSH Style Button — Calendar (live date)  ·  CSS-only, scales with the card
 # =============================================================================
-#  No svg, no custom_fields — drawn with plain CSS so it works on old tablet
+#  No svg, no custom_fields — drawn with plain CSS so it works on tablet
 #  webviews (needs a current button-card; older ones ignore `styles`).
 #
-#  The border/band are on the CARD (the layout that positions the number
-#  correctly), and the whole card is scaled to ~80% so it matches the
-#  footprint of the other KSH icons instead of filling the tile.
-#    - day number -> native `name`  text template
-#    - month      -> native `label` text template (on the white band)
+#  Text is sized in CONTAINER units (cqh = % of card height) so the day/month
+#  grow and shrink WITH the card. A px value is listed first as a fallback for
+#  very old webviews (pre-2022) that don't support container queries.
+#
+#    - day number -> native `name`  text template  (white, scales)
+#    - month      -> native `label` text template  (black, on the white band)
+#    - body/band  -> styles.card border + background gradient
 #
 #  Tap  = set the kitchen tablet's calendar view to "Schedule".
 #  Size = `transform: scale(0.8)` on styles.card (lower = smaller).
@@ -39,6 +41,7 @@ styles:
   card:
     - padding: 0px
     - position: relative
+    - container-type: size           # make the card a container so cqh works
     - transform: scale(0.8)          # shrink to icon size (lower = smaller)
     - transform-origin: center
     - border: '4px solid #FFFFFF'
@@ -53,9 +56,10 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 60px
+    - font-size: 48px                # fallback for old webviews
+    - font-size: 38cqh               # scales with the card
     - line-height: '1'
-    - color: '#FFFFFF'
+    - color: white
     - text-align: center
   label:
     - position: absolute
@@ -65,7 +69,8 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 18px
-    - letter-spacing: 3px
-    - color: '#000000'
+    - font-size: 15px                # fallback for old webviews
+    - font-size: 10cqh               # scales with the card
+    - letter-spacing: 0.15em
+    - color: black
     - text-align: center
