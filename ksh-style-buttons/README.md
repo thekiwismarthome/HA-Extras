@@ -214,8 +214,8 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **byd** | more‑info | EV tile off the **bydauto** integration. **Static SVG** (no JS templates) — the BYD wordmark logo in red, with a soft radial halo that fades to transparent + a drop‑shadow glow. Fixed colour; recolour by editing the hex. Live %/gauge/charging animation is a later add‑on once JS templates are sorted |
 | **calendar** | call‑service | live date tile: big day number + month, drawn with **pure CSS** (border + gradient band, no SVG/custom_fields) so it survives old tablet webviews; day/month via `name`/`label` text templates. Needs a reasonably current button‑card (older versions ignore `styles`) |
 | **intercom** | toggle | phone button (`mdi:phone`) that opens the call picker (toggles `input_boolean.intercom_menu`) |
-| **intercom-picker** | call‑service | popup overlay (a `conditional` card) that **auto‑lists every `esphome.ks_*_intercom_call` service**, prettifies the device name, and calls the one you tap. Needs the `input_boolean.intercom_menu` helper and button‑card templated‑HTML rendering |
-| **intercom-card** | call‑service | the same auto‑listing call list as a **standalone always‑visible card** — no helper, no popup, no conditional. Drop it on a view |
+| **intercom-picker** | call‑service | popup overlay (a `conditional` card) that rings another **Kiosk Satellite**: calls this tablet's own `esphome.<node>_intercom_call` with `kiosk: <target name>`, plus a hang‑up row. Configure `call_service` + `targets`; needs the `input_boolean.intercom_menu` helper |
+| **intercom-card** | — | the same call list as a **standalone always‑visible card** (no helper/popup). Configure `call_service` (this tablet's own action) + `targets` (friendly names of the other kiosks); each row rings via `kiosk:`, plus a hang‑up row |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |
