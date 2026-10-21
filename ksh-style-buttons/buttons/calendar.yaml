@@ -1,15 +1,17 @@
 # KSH Style Button — Calendar (live date)  ·  CSS-only, max-compatibility build
 # =============================================================================
-#  No svg, no custom_fields — the calendar is drawn with plain CSS so it works
-#  on old tablet webviews (needs a current button-card; older ones ignore
-#  `styles`). The bordered box is INSET (card padding) so it matches the
-#  footprint of the other KSH icons instead of filling the whole tile.
-#    - day number -> native `name`  text template
-#    - month      -> native `label` text template
-#    - body/band  -> styles.grid border + background gradient (inner box)
+#  No svg, no custom_fields — drawn with plain CSS so it works on old tablet
+#  webviews (needs a current button-card; older ones ignore `styles`).
 #
-#  Tap = set the kitchen tablet's calendar view to "Schedule".
-#  Size: tweak `padding` on styles.card (bigger % = smaller calendar).
+#  The border/band are on the CARD (the layout that positions the number
+#  correctly), and the whole card is scaled to ~80% so it matches the
+#  footprint of the other KSH icons instead of filling the tile.
+#    - day number -> native `name`  text template
+#    - month      -> native `label` text template (on the white band)
+#
+#  Tap  = set the kitchen tablet's calendar view to "Schedule".
+#  Size = `transform: scale(0.8)` on styles.card (lower = smaller).
+#  Don't want the month? set `show_label: false`.
 # =============================================================================
 type: custom:button-card
 aspect_ratio: 1/1
@@ -35,20 +37,14 @@ hold_action:
   action: none
 styles:
   card:
-    - padding: 12%            # inset -> inner box ~76% of the tile (match other icons)
-    - background-color: transparent
-    - box-shadow: none
-    - border: none
-  grid:
+    - padding: 0px
     - position: relative
-    - width: 100%
-    - height: 100%
-    - box-sizing: border-box
+    - transform: scale(0.8)          # shrink to icon size (lower = smaller)
+    - transform-origin: center
     - border: '4px solid #FFFFFF'
-    - border-radius: 16px
+    - border-radius: 20px
     - background: 'linear-gradient(#FFFFFF 0, #FFFFFF 26%, rgba(0,0,0,0) 26%)'
     - box-shadow: '0 0 12px rgba(255, 255, 255, 0.18)'
-    - overflow: visible
   name:
     - position: absolute
     - top: 62%
@@ -57,7 +53,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 48px
+    - font-size: 60px
     - line-height: '1'
     - color: '#FFFFFF'
     - text-align: center
@@ -69,7 +65,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 14px
-    - letter-spacing: 2px
+    - font-size: 18px
+    - letter-spacing: 3px
     - color: '#000000'
     - text-align: center
