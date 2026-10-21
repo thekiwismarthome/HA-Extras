@@ -1,15 +1,14 @@
 # KSH Style Button — Calendar (live date)
 # =============================================================================
 #  Shows today's date: month band + big day number + weekday, all white, with
-#  a soft halo that fades to transparent. The date is computed live in a
-#  button-card [[[ ... ]]] JS template (new Date()), so it updates on its own.
+#  a soft halo that fades to transparent. Date computed live in a button-card
+#  [[[ ... ]]] JS template.
 #
-#  >>> REQUIRES button-card JavaScript templates to be working. If this tile
-#      shows raw "const d = ..." text instead of a calendar, your custom:
-#      button-card isn't evaluating [[[ ]]] templates — see the test card in
-#      the chat notes. (Update custom:button-card via HACS to the latest.)
+#  NOTE: month/weekday are built from plain arrays (NOT toLocaleString) so it
+#  works on tablet webviews (Fully Kiosk / old Android WebView) where
+#  Intl/toLocaleString options can throw and leave the card blank.
 #
-#  Tap = navigate to /calendar (change the path to your calendar view).
+#  Tap = set the kitchen tablet's calendar view to "Schedule".
 # =============================================================================
 type: custom:button-card
 aspect_ratio: 1/1
@@ -17,36 +16,49 @@ show_name: false
 show_state: false
 show_icon: false
 tap_action:
-  action: navigate
-  navigation_path: /calendar     # <- change to your calendar dashboard/view path
+  action: call-service
+  service: select.select_option
+  target:
+    entity_id: select.kitchen_kitchen_tablet_calendar_view
+  data:
+    option: Schedule
 hold_action:
   action: none
 custom_fields:
   cal_graphic: |
     [[[
-      const d = new Date();
-      const day = d.getDate();
-      const mon = d.toLocaleString('en', { month: 'short' }).toUpperCase();
-      const dow = d.toLocaleString('en', { weekday: 'short' }).toUpperCase();
-      const bg = 'var(--card-background-color, #000)';
-      let out = '';
-      out += '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="cal-svg">';
-      out +=   '<defs><radialGradient id="calHalo" cx="50%" cy="50%" r="50%">';
-      out +=     '<stop offset="0%" stop-color="var(--cal-color)" stop-opacity="0.22"></stop>';
-      out +=     '<stop offset="45%" stop-color="var(--cal-color)" stop-opacity="0.11"></stop>';
-      out +=     '<stop offset="78%" stop-color="var(--cal-color)" stop-opacity="0.03"></stop>';
-      out +=     '<stop offset="100%" stop-color="var(--cal-color)" stop-opacity="0"></stop>';
-      out +=   '</radialGradient></defs>';
-      out +=   '<circle cx="120" cy="120" r="122" fill="url(#calHalo)"></circle>';
-      out +=   '<rect x="82" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
-      out +=   '<rect x="146" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
-      out +=   '<rect x="50" y="62" width="140" height="132" rx="22" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
-      out +=   '<path d="M50 94 V84 a22 22 0 0 1 22 -22 H168 a22 22 0 0 1 22 22 V94 Z" fill="var(--cal-color)"></path>';
-      out +=   '<text class="cal-mon" x="120" y="87" font-size="16" fill="' + bg + '">' + mon + '</text>';
-      out +=   '<text class="cal-day" x="120" y="162" font-size="56">' + day + '</text>';
-      out +=   '<text class="cal-dow" x="120" y="182" font-size="13">' + dow + '</text>';
-      out += '</svg>';
-      return out;
+      try {
+        const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        const DOW = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+        const d = new Date();
+        const day = d.getDate();
+        const mon = MON[d.getMonth()];
+        const dow = DOW[d.getDay()];
+        const bg = 'var(--card-background-color, #000)';
+        let out = '';
+        out += '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="cal-svg">';
+        out +=   '<defs><radialGradient id="calHalo" cx="50%" cy="50%" r="50%">';
+        out +=     '<stop offset="0%" stop-color="var(--cal-color)" stop-opacity="0.22"></stop>';
+        out +=     '<stop offset="45%" stop-color="var(--cal-color)" stop-opacity="0.11"></stop>';
+        out +=     '<stop offset="78%" stop-color="var(--cal-color)" stop-opacity="0.03"></stop>';
+        out +=     '<stop offset="100%" stop-color="var(--cal-color)" stop-opacity="0"></stop>';
+        out +=   '</radialGradient></defs>';
+        out +=   '<circle cx="120" cy="120" r="122" fill="url(#calHalo)"></circle>';
+        out +=   '<rect x="82" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+        out +=   '<rect x="146" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+        out +=   '<rect x="50" y="62" width="140" height="132" rx="22" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+        out +=   '<path d="M50 94 V84 a22 22 0 0 1 22 -22 H168 a22 22 0 0 1 22 22 V94 Z" fill="var(--cal-color)"></path>';
+        out +=   '<text class="cal-mon" x="120" y="87" font-size="16" fill="' + bg + '">' + mon + '</text>';
+        out +=   '<text class="cal-day" x="120" y="162" font-size="56">' + day + '</text>';
+        out +=   '<text class="cal-dow" x="120" y="182" font-size="13">' + dow + '</text>';
+        out += '</svg>';
+        return out;
+      } catch (e) {
+        return '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="cal-svg">' +
+               '<rect x="50" y="62" width="140" height="132" rx="22" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>' +
+               '<path d="M50 94 V84 a22 22 0 0 1 22 -22 H168 a22 22 0 0 1 22 22 V94 Z" fill="var(--cal-color)"></path>' +
+               '</svg>';
+      }
     ]]]
 styles:
   card:
