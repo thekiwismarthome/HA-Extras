@@ -22,7 +22,7 @@ ksh-style-buttons/
 ├─ buttons/                       ← one self‑contained tile per file
 │  ├─ home.yaml     news.yaml     shares.yaml     ← navigation tiles (use the template)
 │  ├─ byd.yaml                                    ← EV tile (static SVG): red BYD wordmark + faded halo
-│  ├─ calendar.yaml                               ← live date tile (JS): month + day + weekday
+│  ├─ calendar.yaml                               ← live date tile (CSS-only): big day + month
 │  ├─ light.yaml    climate.yaml  vacuum.yaml     ← entity tiles
 │  ├─ ambilight.yaml tv.yaml      music.yaml
 │  ├─ alarm.yaml    sofa.yaml
@@ -210,7 +210,7 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **news** | `nav: news` | line‑art globe filling the box + Antonio wordmark; gradient halo |
 | **shares** | `nav: shares` | random up/down/up bar chart; arrow tracing the tops at matching weight |
 | **byd** | more‑info | EV tile off the **bydauto** integration. **Static SVG** (no JS templates) — the BYD wordmark logo in red, with a soft radial halo that fades to transparent + a drop‑shadow glow. Fixed colour; recolour by editing the hex. Live %/gauge/charging animation is a later add‑on once JS templates are sorted |
-| **calendar** | nav (`/calendar`) | live date tile: month band + big day number + weekday (white), faded halo. Date computed live via `new Date()` in a `[[[ ]]]` JS template — needs button‑card JS templates working |
+| **calendar** | call‑service | live date tile: big day number + month, drawn with **pure CSS** (border + gradient band, no SVG/custom_fields) so it survives old tablet webviews; day/month via `name`/`label` text templates. Needs a reasonably current button‑card (older versions ignore `styles`) |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |
