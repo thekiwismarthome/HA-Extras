@@ -76,6 +76,7 @@ card:
         - width: min(92vw, 420px)
   extra_styles: |
     .ic-wrap { font-family: Antonio, 'Roboto Condensed', sans-serif;
+               position: relative; z-index: 10; pointer-events: auto;
                background: rgba(12,12,12,0.97);
                border: 1px solid rgba(255,255,255,0.12);
                border-radius: 22px; padding: 18px 16px;
@@ -83,12 +84,14 @@ card:
     .ic-title { color: #8b8f93; font-weight: 600; letter-spacing: 3px;
                 font-size: 15px; text-align: center; margin: 4px 0 14px; }
     .ic-row { display: flex; align-items: center; gap: 14px;
+              position: relative; z-index: 10; pointer-events: auto;
               padding: 15px 16px; margin: 8px 0; border-radius: 14px;
               background: rgba(255,255,255,0.05); color: #fff;
               font-size: 21px; font-weight: 600; cursor: pointer; }
     .ic-row:active { background: rgba(52,199,89,0.18); }
-    .ic-ph { color: #34C759; display: inline-flex; }
+    .ic-ph { color: #34C759; display: inline-flex; pointer-events: none; }
     .ic-close { text-align: center; color: #8b8f93; font-weight: 600;
+                position: relative; z-index: 10; pointer-events: auto;
                 font-size: 17px; letter-spacing: 2px; padding: 14px; margin-top: 4px;
                 cursor: pointer; }
     .ic-empty { color: #777; text-align: center; padding: 24px; font-size: 18px; }
