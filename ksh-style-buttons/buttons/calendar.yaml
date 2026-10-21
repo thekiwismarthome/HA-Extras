@@ -1,0 +1,80 @@
+# KSH Style Button — Calendar (live date)
+# =============================================================================
+#  Shows today's date: month band + big day number + weekday, all white, with
+#  a soft halo that fades to transparent. The date is computed live in a
+#  button-card [[[ ... ]]] JS template (new Date()), so it updates on its own.
+#
+#  >>> REQUIRES button-card JavaScript templates to be working. If this tile
+#      shows raw "const d = ..." text instead of a calendar, your custom:
+#      button-card isn't evaluating [[[ ]]] templates — see the test card in
+#      the chat notes. (Update custom:button-card via HACS to the latest.)
+#
+#  Tap = navigate to /calendar (change the path to your calendar view).
+# =============================================================================
+type: custom:button-card
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: navigate
+  navigation_path: /calendar     # <- change to your calendar dashboard/view path
+hold_action:
+  action: none
+custom_fields:
+  cal_graphic: |
+    [[[
+      const d = new Date();
+      const day = d.getDate();
+      const mon = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+      const dow = d.toLocaleString('en', { weekday: 'short' }).toUpperCase();
+      const bg = 'var(--card-background-color, #000)';
+      let out = '';
+      out += '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="cal-svg">';
+      out +=   '<defs><radialGradient id="calHalo" cx="50%" cy="50%" r="50%">';
+      out +=     '<stop offset="0%" stop-color="var(--cal-color)" stop-opacity="0.22"></stop>';
+      out +=     '<stop offset="45%" stop-color="var(--cal-color)" stop-opacity="0.11"></stop>';
+      out +=     '<stop offset="78%" stop-color="var(--cal-color)" stop-opacity="0.03"></stop>';
+      out +=     '<stop offset="100%" stop-color="var(--cal-color)" stop-opacity="0"></stop>';
+      out +=   '</radialGradient></defs>';
+      out +=   '<circle cx="120" cy="120" r="122" fill="url(#calHalo)"></circle>';
+      out +=   '<rect x="82" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+      out +=   '<rect x="146" y="48" width="12" height="30" rx="6" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+      out +=   '<rect x="50" y="62" width="140" height="132" rx="22" fill="none" stroke="var(--cal-color)" stroke-width="4"></rect>';
+      out +=   '<path d="M50 94 V84 a22 22 0 0 1 22 -22 H168 a22 22 0 0 1 22 22 V94 Z" fill="var(--cal-color)"></path>';
+      out +=   '<text class="cal-mon" x="120" y="87" font-size="16" fill="' + bg + '">' + mon + '</text>';
+      out +=   '<text class="cal-day" x="120" y="162" font-size="56">' + day + '</text>';
+      out +=   '<text class="cal-dow" x="120" y="182" font-size="13">' + dow + '</text>';
+      out += '</svg>';
+      return out;
+    ]]]
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - overflow: visible
+  grid:
+    - position: relative
+    - overflow: visible
+  custom_fields:
+    cal_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 100%
+      - height: 100%
+      - overflow: visible
+      - --card-background-color: '#000000'
+      - --cal-color: '#FFFFFF'
+      - filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.18))
+extra_styles: |
+  .cal-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .cal-mon { font-family: Antonio, 'Roboto Condensed', sans-serif; font-weight: 700;
+             text-anchor: middle; letter-spacing: 3px; }
+  .cal-day { font-family: Antonio, 'Roboto Condensed', sans-serif; font-weight: 700;
+             text-anchor: middle; fill: var(--cal-color); }
+  .cal-dow { font-family: Antonio, 'Roboto Condensed', sans-serif; font-weight: 600;
+             text-anchor: middle; letter-spacing: 2px; fill: var(--cal-color); opacity: 0.6; }
