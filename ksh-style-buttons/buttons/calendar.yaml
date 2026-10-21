@@ -4,8 +4,8 @@
 #  webviews (needs a current button-card; older ones ignore `styles`).
 #
 #  Text is sized in CONTAINER units (cqh = % of card height) so the day/month
-#  grow and shrink WITH the card. A px value is listed first as a fallback for
-#  very old webviews (pre-2022) that don't support container queries.
+#  grow and shrink WITH the card. (Needs a webview with container-query support,
+#  ~2022+; if the text comes out tiny/unscaled, tell me and I'll switch to SVG.)
 #
 #    - day number -> native `name`  text template  (white, scales)
 #    - month      -> native `label` text template  (black, on the white band)
@@ -56,8 +56,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 48px                # fallback for old webviews
-    - font-size: 38cqh               # scales with the card
+    - font-size: 38cqh               # scales with the card height
     - line-height: '1'
     - color: white
     - text-align: center
@@ -69,8 +68,7 @@ styles:
     - transform: translateY(-50%)
     - font-family: Antonio, sans-serif
     - font-weight: '700'
-    - font-size: 15px                # fallback for old webviews
-    - font-size: 10cqh               # scales with the card
+    - font-size: 10cqh               # scales with the card height
     - letter-spacing: 0.15em
     - color: black
     - text-align: center
