@@ -56,7 +56,9 @@ custom_fields:
 
       const me = devices.find(d => d.norm === norm(v.my_device));
       const myNode = me ? me.node : '';
-      const busy = s => s === 'Calling';
+      // busy = any state that isn't an idle-like one (robust to exact wording/case)
+      const IDLE = ['idle','ended','off','unavailable','unknown','none',''];
+      const busy = s => !IDLE.includes((s == null ? '' : String(s)).trim().toLowerCase());
       const admin = !!(hass.user && hass.user.is_admin);
 
       let targets = devices.filter(d => d.norm !== norm(v.my_device));
