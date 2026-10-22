@@ -19,8 +19,15 @@ ksh-style-buttons/
 ├─ README.md                     ← you are here
 ├─ templates/
 │  └─ ksh-style-buttons.yaml      ← reusable button_card_templates (ksh_tap_beep behaviour)
+├─ cards/
+│  └─ ksh-intercom-card.js        ← proper custom Lovelace card (intercom + built-in editor)
 ├─ buttons/                       ← one self‑contained tile per file
 │  ├─ home.yaml     news.yaml     shares.yaml     ← navigation tiles (use the template)
+│  ├─ byd.yaml                                    ← EV tile (static SVG): red BYD wordmark + faded halo
+│  ├─ calendar.yaml                               ← live date tile (CSS-only): big day + month
+│  ├─ intercom.yaml   intercom-picker.yaml        ← phone button + auto-listing call picker
+│  ├─ intercom-card.yaml                          ← standalone always-visible call list
+│  ├─ intercom-hub.yaml                           ← self-contained intercom: board + built-in setup (gear)
 │  ├─ light.yaml    climate.yaml  vacuum.yaml     ← entity tiles
 │  ├─ ambilight.yaml tv.yaml      music.yaml
 │  ├─ alarm.yaml    sofa.yaml
@@ -33,7 +40,27 @@ Each file in `buttons/` is a complete `custom:button-card` you can paste into a 
 
 ---
 
+## The custom intercom card (`cards/ksh-intercom-card.js`)
+
+A **proper custom Lovelace card** — the intercom board with a real **config editor**, so
+you set it up by editing the card in the UI (no helpers, no YAML, no templated‑HTML
+workarounds). Config lives in the card's own YAML, so each tablet's `my_device` is
+independent.
+
+**Install**
+1. Copy `cards/ksh-intercom-card.js` to `<config>/www/ksh-intercom-card.js`.
+2. Settings → Dashboards → ⋮ → **Resources** → **Add resource** → URL `/local/ksh-intercom-card.js`, type **JavaScript Module**. Hard‑refresh.
+3. Edit a dashboard → **Add card** → search **KSH Intercom**. Click the card's ✏️ edit to pick **this device** and which others to show.
+
+**What it does:** auto‑discovers kiosks from `sensor.*_intercom`, matches each to its
+ESPHome node via the `*_intercom_call` services; idle devices tap‑to‑call, busy devices
+show who they're with, an in‑call banner + Hang up for your own device, and **admin‑only**
+End buttons. Config: `my_device`, `show_all` / `devices`, `node_overrides`.
+
+---
+
 ## Requirements
+
 
 | Need | Why |
 |------|-----|
@@ -207,6 +234,12 @@ return 'rgb(' + Math.round(224 + p*31) + ',' + Math.round(140 + p*100) + ',' + M
 | **home** | `nav: home` | template‑driven navigation; house glyph + glow |
 | **news** | `nav: news` | line‑art globe filling the box + Antonio wordmark; gradient halo |
 | **shares** | `nav: shares` | random up/down/up bar chart; arrow tracing the tops at matching weight |
+| **byd** | more‑info | EV tile off the **bydauto** integration. **Static SVG** (no JS templates) — the BYD wordmark logo in red, with a soft radial halo that fades to transparent + a drop‑shadow glow. Fixed colour; recolour by editing the hex. Live %/gauge/charging animation is a later add‑on once JS templates are sorted |
+| **calendar** | call‑service | live date tile: big day number + month, drawn with **pure CSS** (border + gradient band, no SVG/custom_fields) so it survives old tablet webviews; day/month via `name`/`label` text templates. Needs a reasonably current button‑card (older versions ignore `styles`) |
+| **intercom** | toggle | phone button (`mdi:phone`) that opens the call picker (toggles `input_boolean.intercom_menu`) |
+| **intercom-picker** | call‑service | popup overlay (a `conditional` card) that rings another **Kiosk Satellite**: calls this tablet's own `esphome.<node>_intercom_call` with `kiosk: <target name>`, plus a hang‑up row. Configure `call_service` + `targets`; needs the `input_boolean.intercom_menu` helper |
+| **intercom-card** | — | the same call list as a **standalone always‑visible card** (no helper/popup). Configure `call_service` (this tablet's own action) + `targets` (friendly names of the other kiosks); each row rings via `kiosk:`, plus a hang‑up row |
+| **intercom-hub** | — | **no‑resource fallback** for the JS card above (use when you can't add a Lovelace resource). Self‑contained button‑card: live board + a gear that flips to built‑in setup, saved to an `input_text.intercom_config` helper (max length 255). Same discovery/call/End/admin behaviour |
 | **light** | inline toggle | brightness → colour/stroke/halo/glow via JS‑var templates |
 | **climate** | inline `turn_on`/`off` | discrete `state:` colour map + airflow animation |
 | **vacuum** | inline start/pause/locate | full animation system (spin, particles, dock) + bin‑full template state |

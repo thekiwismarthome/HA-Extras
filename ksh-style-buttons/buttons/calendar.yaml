@@ -1,0 +1,74 @@
+# KSH Style Button — Calendar (live date)  ·  CSS-only, scales with the card
+# =============================================================================
+#  No svg, no custom_fields — drawn with plain CSS so it works on tablet
+#  webviews (needs a current button-card; older ones ignore `styles`).
+#
+#  Text is sized in CONTAINER units (cqh = % of card height) so the day/month
+#  grow and shrink WITH the card. (Needs a webview with container-query support,
+#  ~2022+; if the text comes out tiny/unscaled, tell me and I'll switch to SVG.)
+#
+#    - day number -> native `name`  text template  (white, scales)
+#    - month      -> native `label` text template  (black, on the white band)
+#    - body/band  -> styles.card border + background gradient
+#
+#  Tap  = set the kitchen tablet's calendar view to "Schedule".
+#  Size = `transform: scale(0.8)` on styles.card (lower = smaller).
+#  Don't want the month? set `show_label: false`.
+# =============================================================================
+type: custom:button-card
+aspect_ratio: 1/1
+show_icon: false
+show_state: false
+show_name: true
+show_label: true
+name: |
+  [[[ return new Date().getDate().toString(); ]]]
+label: |
+  [[[
+    const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    return M[new Date().getMonth()];
+  ]]]
+tap_action:
+  action: call-service
+  service: select.select_option
+  target:
+    entity_id: select.kitchen_kitchen_tablet_calendar_view
+  data:
+    option: Schedule
+hold_action:
+  action: none
+styles:
+  card:
+    - padding: 0px
+    - position: relative
+    - container-type: size           # make the card a container so cqh works
+    - transform: scale(0.8)          # shrink to icon size (lower = smaller)
+    - transform-origin: center
+    - border: '4px solid #FFFFFF'
+    - border-radius: 20px
+    - background: 'linear-gradient(#FFFFFF 0, #FFFFFF 26%, rgba(0,0,0,0) 26%)'
+    - box-shadow: '0 0 12px rgba(255, 255, 255, 0.18)'
+  name:
+    - position: absolute
+    - top: 62%
+    - left: 0px
+    - right: 0px
+    - transform: translateY(-50%)
+    - font-family: Antonio, sans-serif
+    - font-weight: '700'
+    - font-size: 38cqh               # scales with the card height
+    - line-height: '1'
+    - color: white
+    - text-align: center
+  label:
+    - position: absolute
+    - top: 13%
+    - left: 0px
+    - right: 0px
+    - transform: translateY(-50%)
+    - font-family: Antonio, sans-serif
+    - font-weight: '700'
+    - font-size: 15cqh               # scales with the card height
+    - letter-spacing: 0.15em
+    - color: black
+    - text-align: center

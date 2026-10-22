@@ -1,0 +1,39 @@
+# KSH Style Button — Intercom (phone / open call menu)
+# =============================================================================
+#  Tap -> opens the intercom call picker (toggles input_boolean.intercom_menu,
+#  which the intercom-picker.yaml conditional card listens to).
+#
+#  SETUP (once):
+#    Create a toggle helper:  Settings -> Devices & Services -> Helpers ->
+#    Create Helper -> Toggle -> name it so the entity is
+#    input_boolean.intercom_menu   (or change the entity_id below + in
+#    intercom-picker.yaml to match yours).
+#
+#  A plain MDI phone icon is used (renders on any webview, unlike inline SVG).
+# =============================================================================
+type: custom:button-card
+show_name: false
+show_state: false
+show_icon: true
+icon: mdi:phone
+aspect_ratio: 1/1
+tap_action:
+  action: call-service
+  service: input_boolean.toggle
+  target:
+    entity_id: input_boolean.intercom_menu
+hold_action:
+  action: none
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+  icon:
+    - width: 55%
+    - color: '#FFFFFF'
+    - filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35))
+  img_cell:
+    - justify-content: center
+    - align-items: center

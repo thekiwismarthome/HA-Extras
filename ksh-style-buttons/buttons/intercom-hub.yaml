@@ -1,0 +1,222 @@
+# KSH Style — Intercom Hub (self-contained, Kiosk Satellite)
+# =============================================================================
+#  One card = the live intercom board PLUS its own setup. Tap the gear in the
+#  header to flip into Setup (pick this device, show-all vs choose, per-device
+#  checkboxes); tap it again to go back. Setup saves to a text helper the board
+#  reads, so nothing else is needed.
+#
+#  Board: idle devices tap-to-call; busy devices show who they're with; an
+#  in-call banner + Hang up for your own device; admin-only End buttons.
+#
+#  SETUP (once): create a Text helper with entity id  input_text.intercom_config
+#  and MAX LENGTH 255 (or change config_entity below).
+#
+#  my_device/show_all/devices come from that helper once you use Setup; the
+#  variables below are just the fallback before anything is configured.
+# =============================================================================
+type: custom:button-card
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: none
+triggers_update: all
+variables:
+  config_entity: input_text.intercom_config
+  my_device: ''
+  show_all: true
+  devices: []
+  node_overrides: {}
+custom_fields:
+  hub: |
+    [[[
+      const PHONE = `<svg viewBox="0 0 24 24" class="icn"><path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/></svg>`;
+      const HANGUP = `<svg viewBox="0 0 24 24" class="icn"><path d="M12,9C10.4,9 8.85,9.25 7.4,9.72V12.82C7.4,13.22 7.17,13.56 6.84,13.72C5.86,14.21 4.97,14.84 4.17,15.57C4,15.75 3.75,15.86 3.5,15.86C3.2,15.86 2.95,15.74 2.77,15.56L0.29,13.08C0.11,12.9 0,12.65 0,12.36C0,12.06 0.12,11.81 0.3,11.63C3.34,8.78 7.46,7 12,7C16.54,7 20.66,8.78 23.7,11.63C23.88,11.81 24,12.06 24,12.36C24,12.65 23.89,12.9 23.71,13.08L21.23,15.56C21.05,15.74 20.8,15.86 20.5,15.86C20.25,15.86 20,15.75 19.83,15.57C19.03,14.84 18.14,14.21 17.16,13.72C16.83,13.56 16.6,13.22 16.6,12.82V9.72C15.15,9.25 13.6,9 12,9Z"/></svg>`;
+      const COG = `<svg viewBox="0 0 24 24" class="icn"><path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/></svg>`;
+      const CHK = `<svg viewBox="0 0 24 24" class="icn"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>`;
+      const DOT = `<svg viewBox="0 0 24 24" class="icn"><circle cx="12" cy="12" r="8"/></svg>`;
+      const H = `document.querySelector('home-assistant').hass`;
+      const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+      const esc = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const v = variables || {};
+      const ov = v.node_overrides || {};
+
+      // --- config: prefer the helper, fall back to variables ---
+      const cfgEnt = v.config_entity || 'input_text.intercom_config';
+      const raw = hass.states[cfgEnt] ? hass.states[cfgEnt].state : '';
+      let MY = v.my_device || '', SHOWALL = (v.show_all !== false), DEVS = Array.isArray(v.devices) ? v.devices : [];
+      if (raw && raw.indexOf('~') >= 0) {
+        const cp = raw.split('~');
+        MY = cp[0] || '';
+        SHOWALL = cp[1] === '1';
+        DEVS = cp[2] ? cp[2].split('|').filter(Boolean) : [];
+      }
+      const cfg = { my_device: MY, show_all: SHOWALL, devices: DEVS };
+      const compose = c => [c.my_device || '', c.show_all ? '1' : '0', (c.devices || []).join('|')].join('~');
+      const write = val => `var h=${H};h.callService('input_text','set_value',{entity_id:'${cfgEnt}',value:'${esc(val)}'});event.stopPropagation();`;
+
+      // --- discover devices ---
+      const svcs = (hass.services && hass.services.esphome) ? Object.keys(hass.services.esphome) : [];
+      const nodes = svcs.filter(k => /_intercom_call$/.test(k)).map(k => k.replace(/_intercom_call$/,''));
+      const devices = Object.keys(hass.states)
+        .filter(id => /^sensor\..*_intercom$/.test(id))
+        .map(id => {
+          const st = hass.states[id];
+          const fn = (st.attributes && st.attributes.friendly_name) || id;
+          const name = fn.replace(/\s*intercom$/i,'').trim();
+          const n = norm(name);
+          const node = ov[name] || nodes.find(nd => nd === n || nd.endsWith('_'+n) || nd.endsWith(n)) || '';
+          const k = hass.states[id + '_kiosk'];
+          return { id, name, norm:n, node, state: st.state, talkingTo: k ? k.state : '' };
+        });
+      const discovered = devices.map(d => d.name).filter((n,i,a) => a.indexOf(n) === i).sort();
+
+      const me = devices.find(d => d.norm === norm(MY));
+      const myNode = me ? me.node : '';
+      const IDLE = ['idle','ended','off','unavailable','unknown','none',''];
+      const busy = s => !IDLE.includes((s == null ? '' : String(s)).trim().toLowerCase());
+      const admin = !!(hass.user && hass.user.is_admin);
+
+      let targets = devices.filter(d => d.norm !== norm(MY));
+      if (!SHOWALL && DEVS.length) targets = targets.filter(d => DEVS.map(norm).includes(d.norm));
+
+      // --- edit mode (per-tablet, localStorage) ---
+      let editing = false;
+      try { editing = localStorage.getItem('ksh_ic_edit') === '1'; } catch(e) {}
+      const EDIT = `try{var w=this.closest('.ic-hub');var on=w.classList.toggle('editing');localStorage.setItem('ksh_ic_edit',on?'1':'0');}catch(e){}event.stopPropagation();`;
+
+      let out = `<div class="ic-hub${editing ? ' editing' : ''}">`;
+      out += `<div class="ic-head"><span class="ic-h-title">INTERCOM</span>`
+           + `<span class="ic-h-right"><span class="ic-h-sub">${me ? me.name : (MY || 'not set')}</span>`
+           + `<span class="ic-gear" onpointerup="${EDIT}">${COG}</span></span></div>`;
+
+      // ======================= BOARD =======================
+      out += `<div class="ic-board">`;
+      if (!myNode) out += `<div class="ic-warn">Tap the gear to pick this device</div>`;
+      if (me && busy(me.state)) {
+        const hh = `var h=${H};h.callService('esphome','${myNode}_intercom_hangup',{});event.stopPropagation();`;
+        out += `<div class="ic-me"><span class="ic-me-txt"><span class="live"></span> In call with <b>${me.talkingTo || '…'}</b></span>`
+             + `<span class="ic-end" onpointerup="${hh}">${HANGUP} Hang up</span></div>`;
+      }
+      targets.forEach(d => {
+        if (busy(d.state)) {
+          let right = `<span class="ic-with"><span class="live"></span> ${d.talkingTo || 'in call'}</span>`;
+          if (admin && d.node) {
+            const hh = `var h=${H};h.callService('esphome','${d.node}_intercom_hangup',{});event.stopPropagation();`;
+            right += `<span class="ic-end sm" onpointerup="${hh}">${HANGUP}End</span>`;
+          }
+          out += `<div class="ic-row busy"><span class="ic-name">${d.name}</span><span class="ic-right">${right}</span></div>`;
+        } else {
+          const ok = myNode && d.name;
+          const call = ok ? `var h=${H};h.callService('esphome','${myNode}_intercom_call',{kiosk:'${esc(d.name)}'});event.stopPropagation();` : '';
+          out += `<div class="ic-row${ok ? '' : ' off'}"${ok ? ` onpointerup="${call}"` : ''}><span class="ic-name">${d.name}</span>`
+               + `<span class="ic-right"><span class="ic-call">${PHONE}</span></span></div>`;
+        }
+      });
+      if (targets.length === 0 && devices.length > 0) out += `<div class="ic-empty">No other devices</div>`;
+      if (devices.length === 0) out += `<div class="ic-empty">No intercom sensors found</div>`;
+      out += `</div>`;
+
+      // ======================= SETUP =======================
+      out += `<div class="ic-setup">`;
+      if (!hass.states[cfgEnt]) out += `<div class="ic-warn">Create a Text helper <b>${cfgEnt}</b> (max length 255)</div>`;
+      out += `<div class="st-sec">THIS DEVICE</div><div class="st-pills">`;
+      discovered.forEach(n => {
+        const on = norm(n) === norm(cfg.my_device);
+        const nc = compose(Object.assign({}, cfg, { my_device: n, devices: cfg.devices.filter(d => norm(d) !== norm(n)) }));
+        out += `<span class="st-pill ${on ? 'on' : ''}" onpointerup="${write(nc)}">${on ? DOT : ''}${n}</span>`;
+      });
+      out += `</div>`;
+      out += `<div class="st-sec">SHOW</div><div class="st-seg">`;
+      out += `<span class="st-seg-opt ${cfg.show_all ? 'on' : ''}" onpointerup="${write(compose(Object.assign({}, cfg, { show_all: true })))}">All devices</span>`;
+      out += `<span class="st-seg-opt ${!cfg.show_all ? 'on' : ''}" onpointerup="${write(compose(Object.assign({}, cfg, { show_all: false })))}">Choose</span>`;
+      out += `</div>`;
+      if (!cfg.show_all) {
+        out += `<div class="st-sec">DEVICES TO SHOW</div>`;
+        discovered.filter(n => norm(n) !== norm(cfg.my_device)).forEach(n => {
+          const on = cfg.devices.map(norm).includes(norm(n));
+          const newDevs = on ? cfg.devices.filter(d => norm(d) !== norm(n)) : cfg.devices.concat([n]);
+          out += `<div class="st-chk ${on ? 'on' : ''}" onpointerup="${write(compose(Object.assign({}, cfg, { devices: newDevs })))}"><span class="st-box">${on ? CHK : ''}</span><span>${n}</span></div>`;
+        });
+      }
+      out += `<div class="st-done" onpointerup="${EDIT}">${CHK} Done</div>`;
+      out += `</div>`;
+
+      out += `</div>`;
+      return out;
+    ]]]
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - pointer-events: none
+  grid:
+    - width: 100%
+  custom_fields:
+    hub:
+      - width: 100%
+extra_styles: |
+  .ic-hub { font-family: Antonio, 'Roboto Condensed', sans-serif;
+            position: relative; z-index: 10; pointer-events: auto;
+            background: rgba(14,14,14,0.98); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 22px; padding: 16px 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+  .ic-hub:not(.editing) .ic-setup { display: none; }
+  .ic-hub.editing .ic-board { display: none; }
+  .ic-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 14px; }
+  .ic-h-title { color: #fff; font-weight: 700; letter-spacing: 4px; font-size: 20px; }
+  .ic-h-right { display: flex; align-items: center; gap: 12px; }
+  .ic-h-sub { color: #6b6e70; font-weight: 600; letter-spacing: 2px; font-size: 13px; }
+  .ic-gear { position: relative; z-index: 11; pointer-events: auto; color: #9ba0a3;
+             display: inline-flex; padding: 4px; cursor: pointer; }
+  .ic-hub.editing .ic-gear { color: #00A1E4; }
+  .ic-gear .icn { width: 1.5em; height: 1.5em; margin: 0; }
+  .icn { width: 1.3em; height: 1.3em; vertical-align: middle; fill: currentColor; }
+  .ic-row { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            position: relative; z-index: 10; pointer-events: auto; padding: 14px 16px; margin: 8px 0;
+            border-radius: 14px; background: rgba(255,255,255,0.05); color: #fff; font-size: 21px;
+            font-weight: 600; min-height: 30px; cursor: pointer; }
+  .ic-row.busy { background: rgba(255,159,10,0.08); cursor: default; }
+  .ic-row.off { opacity: 0.5; cursor: default; }
+  .ic-row:not(.busy):not(.off):active { background: rgba(52,199,89,0.18); }
+  .ic-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ic-right { display: flex; align-items: center; gap: 10px; }
+  .ic-call { color: #34C759; display: inline-flex; background: rgba(52,199,89,0.14); border-radius: 10px; padding: 8px 10px; pointer-events: none; }
+  .ic-with { color: #FF9F0A; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .live { width: 9px; height: 9px; border-radius: 50%; background: #FF9F0A; box-shadow: 0 0 8px #FF9F0A; display: inline-block; }
+  .ic-end { color: #FF3B30; display: inline-flex; align-items: center; gap: 6px; position: relative; z-index: 11; pointer-events: auto;
+            background: rgba(255,59,48,0.14); border-radius: 10px; padding: 8px 12px; font-size: 16px; font-weight: 600; }
+  .ic-end.sm { font-size: 14px; padding: 6px 9px; }
+  .ic-end:active { background: rgba(255,59,48,0.3); }
+  .ic-me { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 10px;
+           padding: 14px 16px; border-radius: 14px; background: rgba(0,161,228,0.1); border: 1px solid rgba(0,161,228,0.25); }
+  .ic-me-txt { color: #cfd3d6; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .ic-me-txt .live { background: #00A1E4; box-shadow: 0 0 8px #00A1E4; }
+  .ic-me-txt b { color: #fff; }
+  .ic-warn { color: #FF9F0A; text-align: center; padding: 10px; font-size: 15px; }
+  .ic-empty { color: #777; text-align: center; padding: 20px; font-size: 18px; }
+  /* setup */
+  .st-sec { color: #6b6e70; font-weight: 600; letter-spacing: 3px; font-size: 13px; margin: 14px 6px 8px; }
+  .st-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .st-pill { display: inline-flex; align-items: center; position: relative; z-index: 11; pointer-events: auto;
+             padding: 10px 16px; border-radius: 999px; font-size: 18px; font-weight: 600;
+             background: rgba(255,255,255,0.05); color: #cfd3d6; border: 1.5px solid transparent; cursor: pointer; }
+  .st-pill.on { background: rgba(52,199,89,0.16); color: #fff; border-color: #34C759; }
+  .st-pill .icn { margin-right: 6px; width: 1.1em; height: 1.1em; }
+  .st-pill.on .icn { fill: #34C759; }
+  .st-seg { display: flex; gap: 8px; background: rgba(255,255,255,0.05); border-radius: 14px; padding: 5px; }
+  .st-seg-opt { flex: 1; text-align: center; position: relative; z-index: 11; pointer-events: auto;
+                padding: 12px; border-radius: 10px; font-size: 18px; font-weight: 600; color: #9ba0a3; cursor: pointer; }
+  .st-seg-opt.on { background: #00A1E4; color: #fff; }
+  .st-chk { display: flex; align-items: center; gap: 14px; position: relative; z-index: 11; pointer-events: auto;
+            padding: 13px 16px; margin: 7px 0; border-radius: 14px; background: rgba(255,255,255,0.05);
+            color: #cfd3d6; font-size: 20px; font-weight: 600; cursor: pointer; }
+  .st-chk.on { color: #fff; }
+  .st-box { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #4a4e51; display: inline-flex;
+            align-items: center; justify-content: center; flex: 0 0 auto; }
+  .st-chk.on .st-box { background: #34C759; border-color: #34C759; }
+  .st-chk.on .st-box .icn { fill: #06260f; width: 1.2em; height: 1.2em; margin: 0; }
+  .st-done { display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 11; pointer-events: auto;
+             margin-top: 16px; padding: 14px; border-radius: 14px; background: rgba(52,199,89,0.16); color: #34C759;
+             font-size: 18px; font-weight: 700; letter-spacing: 1px; cursor: pointer; }

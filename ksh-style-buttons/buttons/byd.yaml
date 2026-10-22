@@ -1,0 +1,70 @@
+# KSH Style Button — BYD (EV)  ·  STATIC / no-JavaScript version
+# =============================================================================
+#  A pure inline-SVG tile like climate.yaml / home.yaml — no [[[ ]]] templates
+#  anywhere, so it renders on any button-card setup. The BYD wordmark logo in
+#  red, with a soft radial halo that fades out to transparent (like the
+#  news / shares tiles) plus a drop-shadow glow.
+#
+#  entity = your BYD sensor (only used for the tap = more-info popup).
+#  Tap    = more-info. (Swap to a navigate action — see the note below.)
+#
+#  Colour is a fixed red. To recolour it, change every '#FF3B30' below (and the
+#  rgba in the drop-shadow filter) to your colour.
+# =============================================================================
+type: custom:button-card
+entity: sensor.byd_sealion_7_charge_state
+aspect_ratio: 1/1
+show_name: false
+show_state: false
+show_icon: false
+tap_action:
+  action: more-info
+  # To make it a navigation tile instead, replace the two lines above with:
+  #   action: navigate
+  #   navigation_path: /byd        # <- your BYD view's path
+hold_action:
+  action: more-info
+custom_fields:
+  byd_graphic: |
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="byd-svg">
+      <defs>
+        <radialGradient id="bydHalo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="var(--byd-color)" stop-opacity="0.42"></stop>
+          <stop offset="45%"  stop-color="var(--byd-color)" stop-opacity="0.22"></stop>
+          <stop offset="78%"  stop-color="var(--byd-color)" stop-opacity="0.05"></stop>
+          <stop offset="100%" stop-color="var(--byd-color)" stop-opacity="0"></stop>
+        </radialGradient>
+      </defs>
+      <!-- soft halo that fades to transparent (no hard edge) -->
+      <circle cx="120" cy="120" r="122" fill="url(#bydHalo)"></circle>
+      <!-- BYD wordmark (bbox 30..570 x 248..351; centred + scaled into the 240 grid) -->
+      <g transform="translate(120,120) scale(0.38) translate(-300,-299.5)" fill="var(--byd-color)">
+        <path d="M0,0 L123,0 L135,2 L145,7 L152,14 L156,21 L157,25 L157,36 L154,44 L149,51 L153,58 L156,63 L157,67 L157,78 L154,86 L145,96 L135,101 L122,103 L1,103 L-1,101 L-1,85 L1,84 L124,83 L133,80 L135,71 L132,65 L125,62 L1,61 L-1,59 L-1,44 L1,42 L124,41 L131,38 L134,35 L135,30 L133,23 L124,20 L1,19 L-1,18 L-1,1 Z" transform="translate(31,248)"></path>
+        <path d="M0,0 L20,0 L21,1 L22,33 L24,40 L27,43 L30,44 L66,45 L67,46 L67,63 L66,64 L19,64 L9,61 L2,55 L-1,45 L-1,1 Z" transform="translate(214,248)"></path>
+        <path d="M0,0 L20,0 L21,1 L21,44 L19,52 L16,57 L11,61 L0,64 L-47,65 L-48,102 L-49,103 L-73,103 L-74,102 L-74,46 L-73,45 L-10,44 L-5,41 L-3,38 L-2,31 L-1,1 Z" transform="translate(366,248)"></path>
+        <path d="M0,0 L95,0 L115,2 L129,7 L142,16 L149,24 L155,37 L157,45 L157,58 L153,71 L148,80 L141,88 L127,97 L115,101 L95,103 L0,103 L-2,99 L-2,87 L0,84 L91,83 L110,81 L122,76 L130,68 L134,58 L134,45 L130,35 L122,27 L110,22 L91,20 L0,19 L-2,15 L-2,3 Z" transform="translate(413,248)"></path>
+      </g>
+    </svg>
+styles:
+  card:
+    - padding: 0px
+    - background-color: transparent
+    - box-shadow: none
+    - border: none
+    - overflow: visible
+  grid:
+    - position: relative
+    - overflow: visible
+  custom_fields:
+    byd_graphic:
+      - position: absolute
+      - top: 50%
+      - left: 50%
+      - transform: translate(-50%, -50%)
+      - width: 100%
+      - height: 100%
+      - overflow: visible
+      - --byd-color: '#FF3B30'
+      - filter: drop-shadow(0 0 12px rgba(255, 59, 48, 0.5))
+extra_styles: |
+  .byd-svg { width: 100%; height: 100%; display: block; overflow: visible; }
