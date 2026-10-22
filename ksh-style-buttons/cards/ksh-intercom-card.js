@@ -17,6 +17,7 @@
  *    node_overrides: { "Name": "ks_custom_node" }
  */
 (() => {
+  const VERSION = '0.0.2';
   const SVG = {
     phone: 'M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z',
     hangup: 'M12,9C10.4,9 8.85,9.25 7.4,9.72V12.82C7.4,13.22 7.17,13.56 6.84,13.72C5.86,14.21 4.97,14.84 4.17,15.57C4,15.75 3.75,15.86 3.5,15.86C3.2,15.86 2.95,15.74 2.77,15.56L0.29,13.08C0.11,12.9 0,12.65 0,12.36C0,12.06 0.12,11.81 0.3,11.63C3.34,8.78 7.46,7 12,7C16.54,7 20.66,8.78 23.7,11.63C23.88,11.81 24,12.06 24,12.36C24,12.65 23.89,12.9 23.71,13.08L21.23,15.56C21.05,15.74 20.8,15.86 20.5,15.86C20.25,15.86 20,15.75 19.83,15.57C19.03,14.84 18.14,14.21 17.16,13.72C16.83,13.56 16.6,13.22 16.6,12.82V9.72C15.15,9.25 13.6,9 12,9Z',
@@ -94,6 +95,20 @@
     .box { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #4a4e51; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
     .chk.on .box { background: #34C759; border-color: #34C759; }
     .chk.on .box .icn { fill: #06260f; }
+  `;
+
+  // plain editor styling (standard card-editor look; follows the HA theme)
+  const EDSTYLE = `
+    .ed { font-family: var(--primary-font-family, Roboto, "Segoe UI", sans-serif); color: var(--primary-text-color, #212121); padding: 4px 2px; }
+    .ed .f { margin: 0 0 16px; }
+    .ed h4 { margin: 0 0 6px; font-size: 13px; font-weight: 500; color: var(--secondary-text-color, #727272); }
+    .ed select { width: 100%; padding: 11px 10px; font-size: 15px; border-radius: 6px;
+                 border: 1px solid var(--divider-color, #c4c4c4); background: var(--card-background-color, #fff);
+                 color: var(--primary-text-color, #212121); }
+    .ed .row { display: flex; align-items: center; gap: 12px; padding: 7px 0; font-size: 15px; cursor: pointer; }
+    .ed .sw { justify-content: space-between; }
+    .ed input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--primary-color, #03a9f4); flex: 0 0 auto; cursor: pointer; }
+    .ed .hint { font-size: 12px; color: var(--secondary-text-color, #9b9b9b); margin-top: 4px; }
   `;
 
   // ======================= CARD =======================
@@ -182,42 +197,43 @@
       if (!this._config) return;
       const cfg = this._config;
       const discovered = discover(this._hass).map(d => d.name);
-      let h = `<style>${STYLE}</style><div class="wrap">`;
-      if (discovered.length === 0) h += `<div class="warn">No intercom sensors found yet</div>`;
+      let h = `<style>${EDSTYLE}</style><div class="ed">`;
+      if (discovered.length === 0) h += `<div class="hint">No intercom sensors found yet</div>`;
 
-      h += `<div class="sec">THIS DEVICE</div><div class="pills">`;
-      discovered.forEach(n => {
-        const on = norm(n) === norm(cfg.my_device);
-        h += `<span class="pill ${on ? 'on' : ''}" data-me="${esc(n)}">${on ? '<span class="dot"></span>' : ''}${esc(n)}</span>`;
-      });
-      h += `</div>`;
+      h += `<div class="f"><h4>This device</h4><select id="me">`;
+      h += `<option value=""${cfg.my_device ? '' : ' selected'}>— choose —</option>`;
+      discovered.forEach(n => { h += `<option ${norm(n) === norm(cfg.my_device) ? 'selected' : ''}>${esc(n)}</option>`; });
+      h += `</select><div class="hint">Which kiosk this card runs on</div></div>`;
 
-      h += `<div class="sec">SHOW</div><div class="seg">`;
-      h += `<span class="seg-opt ${cfg.show_all ? 'on' : ''}" data-all="1">All devices</span>`;
-      h += `<span class="seg-opt ${!cfg.show_all ? 'on' : ''}" data-all="0">Choose</span></div>`;
+      h += `<div class="f"><label class="row sw"><span>Show all devices</span>`
+         + `<input type="checkbox" id="all" ${cfg.show_all ? 'checked' : ''}></label></div>`;
 
       if (!cfg.show_all) {
-        h += `<div class="sec">DEVICES TO SHOW</div>`;
+        h += `<div class="f"><h4>Devices to show</h4>`;
         discovered.filter(n => norm(n) !== norm(cfg.my_device)).forEach(n => {
           const on = (cfg.devices || []).map(norm).indexOf(norm(n)) !== -1;
-          h += `<div class="chk ${on ? 'on' : ''}" data-dev="${esc(n)}"><span class="box">${on ? icon(SVG.check) : ''}</span><span>${esc(n)}</span></div>`;
+          h += `<label class="row"><input type="checkbox" data-dev="${esc(n)}" ${on ? 'checked' : ''}><span>${esc(n)}</span></label>`;
         });
+        h += `</div>`;
       }
       h += `</div>`;
       this.shadowRoot.innerHTML = h;
 
       const r = this.shadowRoot;
-      r.querySelectorAll('[data-me]').forEach(el => el.addEventListener('click', () => {
-        const name = el.getAttribute('data-me');
+      const meSel = r.getElementById('me');
+      if (meSel) meSel.addEventListener('change', () => {
+        const name = meSel.value;
         const devices = (cfg.devices || []).filter(d => norm(d) !== norm(name));
         this._emit({ my_device: name, devices });
-      }));
-      r.querySelectorAll('[data-all]').forEach(el => el.addEventListener('click', () => this._emit({ show_all: el.getAttribute('data-all') === '1' })));
-      r.querySelectorAll('[data-dev]').forEach(el => el.addEventListener('click', () => {
+      });
+      const allCb = r.getElementById('all');
+      if (allCb) allCb.addEventListener('change', () => this._emit({ show_all: allCb.checked }));
+      r.querySelectorAll('input[data-dev]').forEach(el => el.addEventListener('change', () => {
         const name = el.getAttribute('data-dev');
         const cur = (cfg.devices || []).slice();
         const i = cur.map(norm).indexOf(norm(name));
-        if (i === -1) cur.push(name); else cur.splice(i, 1);
+        if (el.checked && i === -1) cur.push(name);
+        else if (!el.checked && i !== -1) cur.splice(i, 1);
         this._emit({ devices: cur });
       }));
     }
@@ -232,5 +248,5 @@
     preview: true,
     documentationURL: 'https://github.com/thekiwismarthome/HA-Extras',
   });
-  console.info('%c KSH-INTERCOM-CARD ', 'background:#00A1E4;color:#fff;border-radius:4px', 'loaded');
+  console.info('%c KSH-INTERCOM-CARD ', 'background:#00A1E4;color:#fff;border-radius:4px', 'v' + VERSION + ' loaded');
 })();
