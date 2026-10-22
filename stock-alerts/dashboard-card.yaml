@@ -1,0 +1,82 @@
+# =============================================================================
+# Stock Threshold Alerts — Lovelace card
+# =============================================================================
+# Add this to a dashboard (Edit dashboard > + Add card > Manual / raw YAML).
+# It gives you: a dropdown form to ADD an alert, and a live list to REMOVE
+# them — no YAML editing at runtime.
+#
+# TWO VERSIONS below:
+#   A) Native only  — works on a stock HA install, no custom cards.
+#   B) Mushroom     — prettier, needs the Mushroom cards from HACS.
+# Paste whichever you prefer.
+# =============================================================================
+
+
+# ---------------------------------------------------------------------------
+# A) NATIVE-ONLY VERSION (no HACS required)
+# ---------------------------------------------------------------------------
+type: vertical-stack
+cards:
+  - type: entities
+    title: Add a stock alert
+    show_header_toggle: false
+    entities:
+      - entity: input_select.stock_alert_ticker
+        name: Ticker
+      - entity: input_select.stock_alert_direction
+        name: When price is
+      - entity: input_number.stock_alert_threshold
+        name: Threshold ($)
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: Add alert
+        icon: mdi:plus-circle
+        tap_action:
+          action: perform-action
+          perform_action: script.stock_alert_add
+      - type: button
+        name: Clear all
+        icon: mdi:notification-clear-all
+        tap_action:
+          action: perform-action
+          perform_action: script.stock_alert_clear_all
+        hold_action:
+          action: none
+
+  # Live list of active alerts. Delete an item to remove the alert; tick it
+  # off to pause it (the automation ignores ticked / completed items).
+  - type: todo-list
+    title: Active stock alerts
+    entity: todo.stock_alerts
+
+
+# ---------------------------------------------------------------------------
+# B) MUSHROOM VERSION (needs HACS: Mushroom)
+# ---------------------------------------------------------------------------
+# type: vertical-stack
+# cards:
+#   - type: custom:mushroom-title-card
+#     title: Add a stock alert
+#   - type: custom:mushroom-select-card
+#     entity: input_select.stock_alert_ticker
+#     icon: mdi:finance
+#   - type: custom:mushroom-select-card
+#     entity: input_select.stock_alert_direction
+#     icon: mdi:swap-vertical
+#   - type: custom:mushroom-number-card
+#     entity: input_number.stock_alert_threshold
+#     display_mode: buttons
+#     icon: mdi:currency-usd
+#   - type: custom:mushroom-template-card
+#     primary: Add alert
+#     icon: mdi:plus-circle
+#     icon_color: green
+#     tap_action:
+#       action: perform-action
+#       perform_action: script.stock_alert_add
+#   - type: custom:mushroom-title-card
+#     title: Active stock alerts
+#   - type: todo-list
+#     entity: todo.stock_alerts

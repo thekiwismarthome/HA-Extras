@@ -1,0 +1,200 @@
+# =============================================================================
+# Stock Threshold Alerts — Home Assistant package
+# =============================================================================
+# A no-YAML-at-runtime way to add/remove "alert me when <TICKER> goes
+# above/below <PRICE>" rules straight from a Lovelace card.
+#
+# How it works:
+#   * The list of alerts lives in a native To-do list  ->  todo.stock_alerts
+#     (each item is one alert, e.g. "AAPL below 150.00"). You add them with the
+#     dropdown form on the dashboard and remove them by deleting the to-do item.
+#   * One automation runs every minute, walks the list, compares each rule
+#     against the live price, and notifies you when a threshold is crossed.
+#   * A per-item cooldown (stored in the item's description field) stops it
+#     spamming you, and re-arms automatically once the price moves back.
+#
+# ONE-TIME SETUP (no YAML editing after this):
+#   1. Settings > Devices & Services > Helpers > + Create Helper > To-do list
+#      Name it "Stock Alerts" so it becomes  todo.stock_alerts
+#   2. Make sure packages are enabled in configuration.yaml:
+#        homeassistant:
+#          packages: !include_dir_named packages
+#      then drop this file in  config/packages/stock_alerts.yaml
+#   3. Edit the two CONFIG blocks below (ticker_map + notify target).
+#   4. Restart / reload YAML.
+# =============================================================================
+
+
+# ------------------------------------------------------------------ helpers --
+# The "add alert" form. Prices/tickers are yours to edit — either here or, once
+# loaded, straight from Settings > Helpers (no restart needed for option edits).
+input_select:
+  stock_alert_ticker:
+    name: Stock alert ticker
+    icon: mdi:finance
+    # These MUST match the keys in `ticker_map` in the automation below.
+    options:
+      - AAPL
+      - TSLA
+      - MSFT
+      - NVDA
+  stock_alert_direction:
+    name: Stock alert direction
+    icon: mdi:swap-vertical
+    options:
+      - above
+      - below
+
+input_number:
+  stock_alert_threshold:
+    name: Stock alert threshold
+    icon: mdi:currency-usd
+    min: 0
+    max: 100000
+    step: 0.01
+    mode: box
+
+
+# ------------------------------------------------------------------ scripts --
+script:
+  # Called by the "Add alert" button on the card. Composes a to-do item from
+  # the three dropdowns, e.g. "TSLA above 250.00", and stores it.
+  stock_alert_add:
+    alias: Stock alert - add
+    icon: mdi:plus-circle
+    mode: single
+    sequence:
+      - variables:
+          ticker: "{{ states('input_select.stock_alert_ticker') }}"
+          direction: "{{ states('input_select.stock_alert_direction') | lower }}"
+          threshold: "{{ states('input_number.stock_alert_threshold') | float(0) }}"
+          summary: "{{ ticker }} {{ direction }} {{ '%.2f' | format(threshold) }}"
+      - action: todo.add_item
+        target:
+          entity_id: todo.stock_alerts
+        data:
+          item: "{{ summary }}"
+          # description holds the last-fired epoch; 0 = never fired / armed.
+          description: "0"
+      - action: persistent_notification.create
+        data:
+          title: Stock alert added
+          message: "Now watching: **{{ summary }}**"
+          notification_id: "stock_alert_add"
+
+  # Optional: wipe every alert in one go (handy button for the card).
+  stock_alert_clear_all:
+    alias: Stock alert - clear all
+    icon: mdi:notification-clear-all
+    mode: single
+    sequence:
+      - action: todo.get_items
+        target:
+          entity_id: todo.stock_alerts
+        response_variable: todo_items
+      - repeat:
+          for_each: "{{ todo_items['todo.stock_alerts']['items'] }}"
+          sequence:
+            - action: todo.remove_item
+              target:
+                entity_id: todo.stock_alerts
+              data:
+                item: "{{ repeat.item.uid }}"
+
+
+# -------------------------------------------------------------- automation ---
+automation:
+  - id: stock_threshold_alerts
+    alias: Stock threshold alerts
+    description: >
+      Checks every active alert in todo.stock_alerts against live prices and
+      notifies when a threshold is crossed.
+    mode: single
+    max_exceeded: silent
+
+    # ---------------------------- CONFIG (edit me) ---------------------------
+    variables:
+      # Map each ticker (must match the input_select options above) to the
+      # sensor that holds its live price. Works with any price source:
+      # yahoofinance, Alpha Vantage, a REST sensor, crypto, etc. — just point
+      # each ticker at the right entity_id.
+      ticker_map:
+        AAPL: sensor.yahoofinance_aapl
+        TSLA: sensor.yahoofinance_tsla
+        MSFT: sensor.yahoofinance_msft
+        NVDA: sensor.yahoofinance_nvda
+      # Minimum seconds between repeat notifications for the SAME alert while
+      # the condition stays true. 3600 = nag me at most once an hour.
+      cooldown_seconds: 3600
+      # Where to send the alert. Defaults to your phone (from find-my-phone).
+      notify_target: notify.mobile_app_brents_phone
+    # -------------------------------------------------------------------------
+
+    triggers:
+      - trigger: time_pattern
+        minutes: "/1"
+
+    conditions: []
+
+    actions:
+      - action: todo.get_items
+        target:
+          entity_id: todo.stock_alerts
+        data:
+          status: needs_action        # ignore items you've "ticked off" (paused)
+        response_variable: todo_items
+
+      - repeat:
+          for_each: "{{ todo_items['todo.stock_alerts']['items'] }}"
+          sequence:
+            - variables:
+                parts: "{{ repeat.item.summary.split() }}"
+                ticker: "{{ parts[0] | default('') }}"
+                direction: "{{ parts[1] | default('') | lower }}"
+                threshold: "{{ parts[2] | float(none) if parts | length > 2 else none }}"
+                entity: "{{ ticker_map.get(ticker) }}"
+                price: >
+                  {{ states(entity) | float(none) if entity else none }}
+                last_fired: "{{ repeat.item.description | int(0) }}"
+                crossed: >
+                  {{ price is not none and threshold is not none and
+                     ((direction == 'above' and price >= threshold) or
+                      (direction == 'below' and price <= threshold)) }}
+                cooldown_ok: >
+                  {{ (now().timestamp() | int) - last_fired > cooldown_seconds }}
+
+            - choose:
+                # Threshold crossed and not in cooldown -> notify + stamp time.
+                - conditions: "{{ crossed and cooldown_ok }}"
+                  sequence:
+                    - action: "{{ notify_target }}"
+                      data:
+                        title: "📈 Stock alert: {{ ticker }}"
+                        message: >
+                          {{ ticker }} is {{ direction }} {{ '%.2f' | format(threshold) }}
+                          — currently {{ '%.2f' | format(price) }}
+                        data:
+                          tag: "stock_alert_{{ ticker }}_{{ direction }}"
+                          channel: Stock alerts
+                          importance: high
+                    - action: persistent_notification.create
+                      data:
+                        title: "📈 {{ ticker }} {{ direction }} {{ '%.2f' | format(threshold) }}"
+                        message: "Currently {{ '%.2f' | format(price) }}"
+                        notification_id: "stock_alert_{{ repeat.item.uid }}"
+                    - action: todo.update_item
+                      target:
+                        entity_id: todo.stock_alerts
+                      data:
+                        item: "{{ repeat.item.uid }}"
+                        description: "{{ now().timestamp() | int }}"
+
+                # Price moved back the other side -> re-arm so it can fire again.
+                - conditions: "{{ not crossed and last_fired != 0 }}"
+                  sequence:
+                    - action: todo.update_item
+                      target:
+                        entity_id: todo.stock_alerts
+                      data:
+                        item: "{{ repeat.item.uid }}"
+                        description: "0"
