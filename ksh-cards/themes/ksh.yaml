@@ -1,0 +1,52 @@
+# KSH theme (Kiwi Smart Home)
+# Light: muted grey, easy on the eyes in daylight. Dark: true black for wall tablets at night.
+# Home Assistant switches between the modes automatically (or per device in your profile settings).
+#
+# Install: copy this file to /config/themes/ and make sure configuration.yaml has
+#   frontend:
+#     themes: !include_dir_merge_named themes
+# then run "Reload themes" (Developer tools → Actions → frontend.reload_themes).
+KSH:
+  ha-card-border-radius: "24px"
+  ha-card-border-width: "1px"
+  modes:
+    light:
+      primary-color: "#2F86D6"
+      accent-color: "#E8892B"
+      primary-text-color: "#15181D"
+      secondary-text-color: "#555C66"
+      disabled-text-color: "#9AA0A9"
+      primary-background-color: "#D4D8DE"
+      secondary-background-color: "#C9CED6"
+      lovelace-background: "radial-gradient(1200px 700px at 0% 0%, #EEF0F3 0%, #D3D7DD 60%) fixed"
+      card-background-color: "#E6E9ED"
+      ha-card-background: "rgba(255, 255, 255, 0.5)"
+      ha-card-border-color: "rgba(255, 255, 255, 0.65)"
+      ha-card-box-shadow: "0 8px 24px rgba(25, 45, 85, 0.10)"
+      divider-color: "rgba(0, 0, 0, 0.09)"
+      app-header-background-color: "#D4D8DE"
+      app-header-text-color: "#15181D"
+      sidebar-background-color: "#CDD2D9"
+      sidebar-text-color: "#15181D"
+      sidebar-icon-color: "#555C66"
+      state-icon-color: "#555C66"
+    dark:
+      primary-color: "#7CC4FF"
+      accent-color: "#FFC46B"
+      primary-text-color: "#ECEEF2"
+      secondary-text-color: "#8B919C"
+      disabled-text-color: "#4B505A"
+      primary-background-color: "#000000"
+      secondary-background-color: "#0B0D12"
+      lovelace-background: "radial-gradient(1200px 700px at 0% 0%, #10131C 0%, #000000 55%) fixed"
+      card-background-color: "#0C0E13"
+      ha-card-background: "#0C0E13"
+      ha-card-border-color: "rgba(255, 255, 255, 0.07)"
+      ha-card-box-shadow: "none"
+      divider-color: "rgba(255, 255, 255, 0.08)"
+      app-header-background-color: "#000000"
+      app-header-text-color: "#ECEEF2"
+      sidebar-background-color: "#05060A"
+      sidebar-text-color: "#ECEEF2"
+      sidebar-icon-color: "#8B919C"
+      state-icon-color: "#8B919C"

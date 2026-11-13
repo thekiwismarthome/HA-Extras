@@ -1,0 +1,14 @@
+{
+  "domain": "ksh_cards",
+  "name": "KSH Cards (Kiwi Smart Home)",
+  "codeowners": ["@thekiwismarthome"],
+  "config_flow": true,
+  "dependencies": ["http", "frontend"],
+  "documentation": "https://github.com/thekiwismarthome/HA-Extras/tree/main/ksh-cards",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/thekiwismarthome/HA-Extras/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
+}

@@ -5,6 +5,7 @@ This is a place for all my Scripts, Automations and Cards and extra stuff I want
 
 | Folder | What it is |
 |--------|------------|
+| [`ksh-cards/`](ksh-cards/) | **KSH Cards**: modular line-art device cards (one card per device) and modular weather cards (now, hourly, 7-day, rain radar, wind, UV, air, humidity, pressure, sun & moon, tides), installable as the `ksh_cards` integration. Includes the KSH light/dark theme. MIT licensed. |
 | [`ksh-style-buttons/`](ksh-style-buttons/) | **KSH Style Buttons** — the Kiwi Smart Home button design system + a library of ready-to-use `button-card` tiles (one YAML per button), a shared `ksh_tap_beep` behaviour template, and a full reference dashboard. Working toward an installable add-on. |
 | [`button-style/`](button-style/) | Original design-system write-up + reference dashboard (superseded by [`ksh-style-buttons/`](ksh-style-buttons/)). |
 | [`find-my-phone/`](find-my-phone/) | Find-my-phone automation + script. |
