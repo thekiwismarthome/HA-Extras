@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "KSH Cards (Kiwi Smart Home)",
+        "description": "Adds the KSH icon and weather cards to every dashboard. After adding, refresh your browser (or restart the Kiosk Satellite app) and look for \"KSH\" in the card picker."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "KSH Cards is already installed."
+    }
+  }
+}

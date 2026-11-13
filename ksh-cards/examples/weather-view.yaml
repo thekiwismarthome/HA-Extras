@@ -1,0 +1,35 @@
+# A full weather page built from KSH weather cards (sections view).
+# Remove any card a screen doesn't need. Change entity ids to match your setup.
+title: Weather
+path: weather
+type: sections
+max_columns: 3
+sections:
+  - type: grid
+    column_span: 3
+    cards:
+      - type: custom:ksh-weather-now-card
+        entity: weather.home
+        feels_like_entity: sensor.home_temperature_feels_like
+        aqi_entity: sensor.air_quality_index
+        warnings_entity: sensor.metservice_warnings
+      - type: custom:ksh-weather-daily-card
+        entity: weather.home
+      - type: custom:ksh-weather-hourly-card
+        entity: weather.home
+      - type: custom:ksh-wind-card
+        entity: weather.home
+        gust_entity: sensor.home_wind_gust
+      - type: custom:ksh-uv-card
+        entity: weather.home
+        peak_entity: sensor.forecast_uv_index
+      - type: custom:ksh-humidity-card
+        entity: weather.home
+      - type: custom:ksh-pressure-card
+        entity: weather.home
+      - type: custom:ksh-sun-moon-card
+        entity: sun.sun
+      - type: custom:ksh-tides-card
+        entity: sensor.local_tides
+      - type: custom:ksh-rain-radar-card
+        zoom: 7

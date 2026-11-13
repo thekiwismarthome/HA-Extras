@@ -1,0 +1,35 @@
+# Device tiles built from KSH icon cards (sections view). One card per device.
+title: Devices
+path: devices
+type: sections
+max_columns: 3
+sections:
+  - type: grid
+    cards:
+      - type: heading
+        heading: Lights
+      - type: custom:ksh-ceiling-light-card
+        entity: light.lounge
+        name: Lounge
+      - type: custom:ksh-bedside-lamp-card
+        entity: light.bedside_lamp
+      - type: custom:ksh-nightlight-card
+        entity: light.nightlight
+      - type: custom:ksh-path-lights-card
+        entity: light.path_to_spa
+  - type: grid
+    cards:
+      - type: heading
+        heading: Appliances
+      - type: custom:ksh-heat-pump-card
+        entity: climate.heat_pump
+      - type: custom:ksh-vacuum-card
+        entity: vacuum.robot
+        battery_entity: sensor.robot_battery
+      - type: custom:ksh-washer-card
+        entity: sensor.washing_machine_state
+        remaining_entity: sensor.washing_machine_time_remaining
+      - type: custom:ksh-ev-car-card
+        entity: sensor.car_battery_level
+        range_entity: sensor.car_range
+        charging_entity: binary_sensor.car_charging
